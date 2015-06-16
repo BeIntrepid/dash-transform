@@ -1,5 +1,5 @@
 {
-  "name": "Dash-TemplateModule",
+  "name": "dash-transform",
   "version": "0.0.1",
   "description": "Empty template ready to be used for building modules. Includes a gulp build workflow.",
   "jspm": {
@@ -8,7 +8,9 @@
     "directories": {
       "lib": "dist/system"
     },
-    "dependencies": {},
+    "dependencies": {
+      "jquery": "github:components/jquery@^2.1.4"
+    },
     "devDependencies": {
       "babel": "npm:babel-core@^5.1.13",
       "babel-runtime": "npm:babel-runtime@^5.1.13",

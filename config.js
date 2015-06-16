@@ -19,6 +19,7 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.5.6",
     "core-js": "npm:core-js@0.9.15",
     "gulp": "npm:gulp@3.9.0",
+    "jquery": "github:components/jquery@2.1.4",
     "require-dir": "npm:require-dir@0.3.0",
     "run-sequence": "npm:run-sequence@1.1.0",
     "github:jspm/nodelibs-assert@0.1.0": {
