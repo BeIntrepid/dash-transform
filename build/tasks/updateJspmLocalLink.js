@@ -8,6 +8,6 @@ gulp.task('reinstallJspmLink', shell.task([
   'jspm link ' + args.localLinkName +' -y'
 ]));
 
-gulp.task('updateLocal', function(callback) {
+gulp.task('updateJspmLocalLink', function(callback) {
   return runSequence('build','reinstallJspmLink',callback );
 });
