@@ -17,17 +17,12 @@ System.register(['./steps'], function (_export) {
                     this.endStep = null;
                 }
 
-                Pipe.prototype.addFunctionStep = function addFunctionStep(name, func) {
-                    var s = new steps.FunctionStep(name, func);
-                    this.steps.push(s);
-                };
-
                 Pipe.prototype.addStepTree = function addStepTree(step) {
                     this.endStep = step;
                 };
 
-                Pipe.prototype.call = function call() {
-                    return Promise.resolve(this.endStep.execute());
+                Pipe.prototype.call = function call(input) {
+                    return Promise.resolve(this.endStep.execute(input));
                 };
 
                 return Pipe;

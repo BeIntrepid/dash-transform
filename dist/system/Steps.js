@@ -23,11 +23,11 @@ System.register([], function (_export) {
                     this.ancestors.push(step);
                 };
 
-                Step.prototype.execute = function execute() {
+                Step.prototype.execute = function execute(input) {
                     var executeMethodResults = [];
                     for (var s in this.ancestors) {
                         var step = this.ancestors[s];
-                        executeMethodResults.push(step.execute());
+                        executeMethodResults.push(step.execute(input));
                     }
                     return Promise.all(executeMethodResults);
                 };
@@ -52,6 +52,7 @@ System.register([], function (_export) {
 
                     var executePromise = new Promise(function (res, rej) {
                         var inputPromise = _Step.prototype.execute.call(_this, i);
+
                         inputPromise.then(function (inputs) {
 
                             Promise.resolve(_this.toExecute.apply(null, inputs)).then(function (i) {

@@ -7,19 +7,13 @@ export class Pipe
         this.endStep = null;
     }
 
-    addFunctionStep(name,func)
-    {
-        let s = new steps.FunctionStep(name,func);
-        this.steps.push(s);
-    }
-
     addStepTree(step)
     {
         this.endStep = step;
     }
 
-    call()
+    call(input)
     {
-        return Promise.resolve(this.endStep.execute());
+        return Promise.resolve(this.endStep.execute(input));
     }
 }
