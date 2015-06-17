@@ -22,6 +22,16 @@ System.register(['./steps'], function (_export) {
                     this.steps.push(s);
                 };
 
+                Pipe.prototype.wrapPromise = function wrapPromise(nextStep) {
+                    return function (i) {
+                        var promise = new Promise(function (res, rej) {
+                            var result = nextStep.execute(i);
+                            res(result);
+                        });
+                        return promise;
+                    };
+                };
+
                 Pipe.prototype.call = function call() {
                     var _this = this;
 
@@ -33,15 +43,24 @@ System.register(['./steps'], function (_export) {
                             var nextStepIndex = _this.steps.indexOf(step) + 1;
                             if (nextStepIndex < _this.steps.length) {
                                 var nextStep = _this.steps[nextStepIndex];
-                                nextStep.execute(outputFromLastStep).then(function (output) {
-                                    startNextStep(nextStep, output);
-                                });
+
+                                var result = nextStep.execute(outputFromLastStep);
+
+                                if (typeof result == Promise) {
+                                    result(outputFromLastStep).then(function (output) {
+                                        startNextStep(nextStep, output);
+                                    });
+                                } else {
+                                    startNextStep(nextStep, result);
+                                }
                             } else {
                                 return res(outputFromLastStep);
                             }
                         };
 
-                        _this.steps[0].execute().then(function (output) {
+                        var pStep = _this.wrapPromise(_this.steps[0]);
+
+                        pStep({}).then(function (output) {
                             startNextStep(_this.steps[0], output);
                         });
                     });

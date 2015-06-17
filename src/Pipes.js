@@ -13,6 +13,17 @@ export class Pipe
         this.steps.push(s);
     }
 
+    wrapPromise(nextStep)
+    {
+        return (i)=>{
+            var promise = new Promise((res,rej)=>{
+                var result = nextStep.execute(i);
+                res(result);
+            });
+            return promise;
+        };
+    }
+
     call()
     {
         let input = {};
@@ -24,7 +35,19 @@ export class Pipe
             if(nextStepIndex < this.steps.length)
             {
                 var nextStep = this.steps[nextStepIndex];
-                nextStep.execute(outputFromLastStep).then((output) => {startNextStep(nextStep,output);});
+
+                var result = nextStep.execute(outputFromLastStep);
+
+                if(typeof(result) == Promise)
+                {
+                    result(outputFromLastStep).then((output) => {startNextStep(nextStep,output);});
+                }
+                else
+                {
+                    startNextStep(nextStep,result);
+                }
+
+
             }
             else
             {
@@ -33,7 +56,9 @@ export class Pipe
 
         };
 
-        this.steps[0].execute().then((output) => {startNextStep(this.steps[0],output);});
+            var pStep = this.wrapPromise(this.steps[0]);
+
+            pStep({}).then((output) => {startNextStep(this.steps[0],output);});
         });
 
         return callPromise;
