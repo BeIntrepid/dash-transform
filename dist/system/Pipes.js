@@ -14,7 +14,7 @@ System.register(['./steps'], function (_export) {
                 function Pipe() {
                     _classCallCheck(this, Pipe);
 
-                    this.steps = [];
+                    this.endStep = null;
                 }
 
                 Pipe.prototype.addFunctionStep = function addFunctionStep(name, func) {
@@ -22,50 +22,12 @@ System.register(['./steps'], function (_export) {
                     this.steps.push(s);
                 };
 
-                Pipe.prototype.wrapPromise = function wrapPromise(nextStep) {
-                    return function (i) {
-                        var promise = new Promise(function (res, rej) {
-                            var result = nextStep.execute(i);
-                            res(result);
-                        });
-                        return promise;
-                    };
+                Pipe.prototype.addStepTree = function addStepTree(step) {
+                    this.endStep = step;
                 };
 
                 Pipe.prototype.call = function call() {
-                    var _this = this;
-
-                    var input = {};
-                    var callPromise = new Promise(function (res, rej) {
-
-                        var startNextStep = function startNextStep(step, outputFromLastStep) {
-
-                            var nextStepIndex = _this.steps.indexOf(step) + 1;
-                            if (nextStepIndex < _this.steps.length) {
-                                var nextStep = _this.steps[nextStepIndex];
-
-                                var result = nextStep.execute(outputFromLastStep);
-
-                                if (typeof result == Promise) {
-                                    result(outputFromLastStep).then(function (output) {
-                                        startNextStep(nextStep, output);
-                                    });
-                                } else {
-                                    startNextStep(nextStep, result);
-                                }
-                            } else {
-                                return res(outputFromLastStep);
-                            }
-                        };
-
-                        var pStep = _this.wrapPromise(_this.steps[0]);
-
-                        pStep({}).then(function (output) {
-                            startNextStep(_this.steps[0], output);
-                        });
-                    });
-
-                    return callPromise;
+                    return Promise.resolve(this.endStep.execute());
                 };
 
                 return Pipe;

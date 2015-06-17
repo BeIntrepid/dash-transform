@@ -14,10 +14,23 @@ System.register([], function (_export) {
                 function Step(name) {
                     _classCallCheck(this, Step);
 
+                    this.ancestors = [];
+
                     this.name = name;
                 }
 
-                Step.prototype.execute = function execute() {};
+                Step.prototype.addInputStep = function addInputStep(step) {
+                    this.ancestors.push(step);
+                };
+
+                Step.prototype.execute = function execute() {
+                    var executeMethodResults = [];
+                    for (var s in this.ancestors) {
+                        var step = this.ancestors[s];
+                        executeMethodResults.push(step.execute());
+                    }
+                    return Promise.all(executeMethodResults);
+                };
 
                 return Step;
             })();
@@ -35,7 +48,19 @@ System.register([], function (_export) {
                 _inherits(FunctionStep, _Step);
 
                 FunctionStep.prototype.execute = function execute(i) {
-                    return this.toExecute(i);
+                    var _this = this;
+
+                    var executePromise = new Promise(function (res, rej) {
+                        var inputPromise = _Step.prototype.execute.call(_this, i);
+                        inputPromise.then(function (inputs) {
+
+                            Promise.resolve(_this.toExecute.apply(null, inputs)).then(function (i) {
+                                res(i);
+                            });
+                        });
+                    });
+
+                    return executePromise;
                 };
 
                 return FunctionStep;
