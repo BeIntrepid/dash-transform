@@ -1,7 +1,7 @@
 System.register([], function (_export) {
     "use strict";
 
-    var Executeable, FunctionStep;
+    var Filter, FunctionFilter;
 
     function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
@@ -10,48 +10,48 @@ System.register([], function (_export) {
     return {
         setters: [],
         execute: function () {
-            Executeable = (function () {
-                function Executeable(name) {
-                    _classCallCheck(this, Executeable);
+            Filter = (function () {
+                function Filter(name) {
+                    _classCallCheck(this, Filter);
 
                     this.ancestors = [];
 
                     this.name = name;
                 }
 
-                Executeable.prototype.addInputStep = function addInputStep(step) {
-                    this.ancestors.push(step);
+                Filter.prototype.addInputFilter = function addInputFilter(Filter) {
+                    this.ancestors.push(Filter);
                 };
 
-                Executeable.prototype.execute = function execute(input) {
+                Filter.prototype.execute = function execute(input) {
                     var executeMethodResults = [];
                     for (var s in this.ancestors) {
-                        var step = this.ancestors[s];
-                        executeMethodResults.push(step.execute(input));
+                        var filter = this.ancestors[s];
+                        executeMethodResults.push(filter.execute(input));
                     }
                     return Promise.all(executeMethodResults);
                 };
 
-                return Executeable;
+                return Filter;
             })();
 
-            _export("Executeable", Executeable);
+            _export("Filter", Filter);
 
-            FunctionStep = (function (_Executeable) {
-                function FunctionStep(name, toExecute) {
-                    _classCallCheck(this, FunctionStep);
+            FunctionFilter = (function (_Filter) {
+                function FunctionFilter(name, toExecute) {
+                    _classCallCheck(this, FunctionFilter);
 
-                    _Executeable.call(this, name);
+                    _Filter.call(this, name);
                     this.toExecute = toExecute;
                 }
 
-                _inherits(FunctionStep, _Executeable);
+                _inherits(FunctionFilter, _Filter);
 
-                FunctionStep.prototype.execute = function execute(i) {
+                FunctionFilter.prototype.execute = function execute(i) {
                     var _this = this;
 
                     var executePromise = new Promise(function (res, rej) {
-                        var inputPromise = _Executeable.prototype.execute.call(_this, i);
+                        var inputPromise = _Filter.prototype.execute.call(_this, i);
 
                         inputPromise.then(function (inputs) {
 
@@ -64,10 +64,10 @@ System.register([], function (_export) {
                     return executePromise;
                 };
 
-                return FunctionStep;
-            })(Executeable);
+                return FunctionFilter;
+            })(Filter);
 
-            _export("FunctionStep", FunctionStep);
+            _export("FunctionFilter", FunctionFilter);
         }
     };
 });

@@ -1,4 +1,4 @@
-export class Executeable
+export class Filter
 {
     ancestors = [];
 
@@ -7,9 +7,9 @@ export class Executeable
         this.name = name;
     }
 
-    addInputStep(step)
+    addInputFilter(Filter)
     {
-        this.ancestors.push(step);
+        this.ancestors.push(Filter);
     }
 
     execute(input)
@@ -17,14 +17,14 @@ export class Executeable
         var executeMethodResults = [];
         for(var s in this.ancestors)
         {
-            var step = this.ancestors[s];
-            executeMethodResults.push(step.execute(input));
+            var filter = this.ancestors[s];
+            executeMethodResults.push(filter.execute(input));
         }
         return Promise.all(executeMethodResults);
     }
 }
 
-export class FunctionStep extends Executeable
+export class FunctionFilter extends Filter
 {
     constructor(name,toExecute)
     {
