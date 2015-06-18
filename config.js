@@ -21,6 +21,7 @@ System.config({
     "gulp": "npm:gulp@3.9.0",
     "gulp-shell": "npm:gulp-shell@0.4.2",
     "jquery": "github:components/jquery@2.1.4",
+    "linq-es6": "npm:linq-es6@0.2.1",
     "require-dir": "npm:require-dir@0.3.0",
     "run-sequence": "npm:run-sequence@1.1.0",
     "github:jspm/nodelibs-assert@0.1.0": {

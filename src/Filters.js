@@ -1,5 +1,6 @@
 export class Filter
 {
+    inputObject = null;
     ancestors = [];
 
     constructor(name)
@@ -12,13 +13,13 @@ export class Filter
         this.ancestors.push(Filter);
     }
 
-    execute(input)
+    execute(inputObject,args)
     {
         var executeMethodResults = [];
         for(var s in this.ancestors)
         {
             var filter = this.ancestors[s];
-            executeMethodResults.push(filter.execute(input));
+            executeMethodResults.push(filter.execute(inputObject,args));
         }
         return Promise.all(executeMethodResults);
     }
@@ -32,15 +33,19 @@ export class FunctionFilter extends Filter
         this.toExecute = toExecute;
     }
 
-    execute(i)
+    execute(inputObject,args)
     {
         var executePromise = new Promise((res,rej)=>{
-            var inputPromise = super.execute(i);
+            var inputPromise = super.execute(inputObject,args);
 
             inputPromise.then((inputs) =>{
+                if(inputs.length == 0)
+                {
+                    inputs = [args];
+                }
 
-               Promise.resolve(this.toExecute.apply(null,inputs)).then((i)=>{
-                    res(i);
+               Promise.resolve(this.toExecute.apply(null,[inputObject].concat(inputs))).then((i)=>{
+                    res(inputObject,i);
                 })
             });
         });
