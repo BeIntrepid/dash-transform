@@ -1,4 +1,4 @@
-export class Step
+export class Executeable
 {
     ancestors = [];
 
@@ -24,7 +24,7 @@ export class Step
     }
 }
 
-export class FunctionStep extends Step
+export class FunctionStep extends Executeable
 {
     constructor(name,toExecute)
     {

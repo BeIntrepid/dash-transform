@@ -1,9 +1,10 @@
 import * as steps from './steps'
 
-export class Pipe
+export class Pipe extends steps.Executeable
 {
-    constructor()
+    constructor(name)
     {
+        super(name);
         this.endStep = null;
     }
 
@@ -11,6 +12,12 @@ export class Pipe
     {
         this.endStep = step;
     }
+
+    execute(input)
+    {
+        return this.call(input);
+    }
+
 
     call(input)
     {

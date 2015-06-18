@@ -1,7 +1,7 @@
 System.register([], function (_export) {
     "use strict";
 
-    var Step, FunctionStep;
+    var Executeable, FunctionStep;
 
     function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
@@ -10,20 +10,20 @@ System.register([], function (_export) {
     return {
         setters: [],
         execute: function () {
-            Step = (function () {
-                function Step(name) {
-                    _classCallCheck(this, Step);
+            Executeable = (function () {
+                function Executeable(name) {
+                    _classCallCheck(this, Executeable);
 
                     this.ancestors = [];
 
                     this.name = name;
                 }
 
-                Step.prototype.addInputStep = function addInputStep(step) {
+                Executeable.prototype.addInputStep = function addInputStep(step) {
                     this.ancestors.push(step);
                 };
 
-                Step.prototype.execute = function execute(input) {
+                Executeable.prototype.execute = function execute(input) {
                     var executeMethodResults = [];
                     for (var s in this.ancestors) {
                         var step = this.ancestors[s];
@@ -32,26 +32,26 @@ System.register([], function (_export) {
                     return Promise.all(executeMethodResults);
                 };
 
-                return Step;
+                return Executeable;
             })();
 
-            _export("Step", Step);
+            _export("Executeable", Executeable);
 
-            FunctionStep = (function (_Step) {
+            FunctionStep = (function (_Executeable) {
                 function FunctionStep(name, toExecute) {
                     _classCallCheck(this, FunctionStep);
 
-                    _Step.call(this, name);
+                    _Executeable.call(this, name);
                     this.toExecute = toExecute;
                 }
 
-                _inherits(FunctionStep, _Step);
+                _inherits(FunctionStep, _Executeable);
 
                 FunctionStep.prototype.execute = function execute(i) {
                     var _this = this;
 
                     var executePromise = new Promise(function (res, rej) {
-                        var inputPromise = _Step.prototype.execute.call(_this, i);
+                        var inputPromise = _Executeable.prototype.execute.call(_this, i);
 
                         inputPromise.then(function (inputs) {
 
@@ -65,7 +65,7 @@ System.register([], function (_export) {
                 };
 
                 return FunctionStep;
-            })(Step);
+            })(Executeable);
 
             _export("FunctionStep", FunctionStep);
         }
