@@ -19,7 +19,6 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.5.6",
     "core-js": "npm:core-js@0.9.15",
     "gulp": "npm:gulp@3.9.0",
-    "gulp-shell": "npm:gulp-shell@0.4.2",
     "jquery": "github:components/jquery@2.1.4",
     "linq-es6": "npm:linq-es6@0.2.1",
     "require-dir": "npm:require-dir@0.3.0",
@@ -91,10 +90,6 @@ System.config({
     },
     "npm:assert@1.3.0": {
       "util": "npm:util@0.10.3"
-    },
-    "npm:async@1.2.1": {
-      "process": "github:jspm/nodelibs-process@0.1.1",
-      "systemjs-json": "github:systemjs/plugin-json@0.1.0"
     },
     "npm:babel-runtime@5.5.6": {
       "process": "github:jspm/nodelibs-process@0.1.1"
@@ -329,15 +324,6 @@ System.config({
       "util": "github:jspm/nodelibs-util@0.1.0",
       "vm": "github:jspm/nodelibs-vm@0.1.0"
     },
-    "npm:gulp-shell@0.4.2": {
-      "async": "npm:async@1.2.1",
-      "child_process": "github:jspm/nodelibs-child_process@0.1.0",
-      "gulp-util": "npm:gulp-util@3.0.5",
-      "lodash": "npm:lodash@3.9.3",
-      "path": "github:jspm/nodelibs-path@0.1.0",
-      "process": "github:jspm/nodelibs-process@0.1.1",
-      "through2": "npm:through2@0.6.5"
-    },
     "npm:gulp-util@3.0.5": {
       "array-differ": "npm:array-differ@1.0.0",
       "array-uniq": "npm:array-uniq@1.0.2",
@@ -454,9 +440,6 @@ System.config({
       "lodash.escape": "npm:lodash.escape@3.0.0"
     },
     "npm:lodash@1.0.2": {
-      "process": "github:jspm/nodelibs-process@0.1.1"
-    },
-    "npm:lodash@3.9.3": {
       "process": "github:jspm/nodelibs-process@0.1.1"
     },
     "npm:meow@3.1.0": {
@@ -618,7 +601,7 @@ System.config({
     "npm:stream-browserify@1.0.0": {
       "events": "github:jspm/nodelibs-events@0.1.1",
       "inherits": "npm:inherits@2.0.1",
-      "readable-stream": "npm:readable-stream@1.0.33"
+      "readable-stream": "npm:readable-stream@1.1.13"
     },
     "npm:string_decoder@0.10.31": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0"
