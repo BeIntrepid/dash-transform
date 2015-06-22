@@ -48,6 +48,15 @@ System.register([], function (_export) {
 
                 _inherits(FunctionFilter, _Filter);
 
+                FunctionFilter.prototype.extractInputs = function extractInputs(inputs) {
+                    var extratedInputs = [];
+                    for (var s in inputs) {
+                        extratedInputs.push(inputs[s]);
+                    }
+
+                    return extratedInputs;
+                };
+
                 FunctionFilter.prototype.execute = function execute(inputObject, args) {
                     var _this = this;
 
@@ -55,12 +64,16 @@ System.register([], function (_export) {
                         var inputPromise = _Filter.prototype.execute.call(_this, inputObject, args);
 
                         inputPromise.then(function (inputs) {
-                            if (inputs.length == 0) {
-                                inputs = [args];
-                            }
 
-                            Promise.resolve(_this.toExecute.apply(null, [inputObject].concat(inputs))).then(function (i) {
-                                res(inputObject, i);
+                            var extractedInputs = _this.extractInputs(inputs);
+
+                            var inputForFunction = [inputObject].concat(extractedInputs);
+                            var functionFilterExecutionResult = _this.toExecute.apply(null, inputForFunction);
+                            var functionFilterExecutionPromise = Promise.resolve(functionFilterExecutionResult);
+
+                            functionFilterExecutionPromise.then(function (i) {
+
+                                res(i);
                             });
                         });
                     });
