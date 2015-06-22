@@ -12,19 +12,52 @@ export class TransformNode
         this.filter = filter;
     }
 
+    extractInputs(inputs)
+    {
+        var extratedInputs = [];
+        for(var s in inputs)
+        {
+            extratedInputs.push(inputs[s]);
+        }
+
+        return extratedInputs;
+    }
+
     addInput(ancestor)
     {
         this.ancestors.push(ancestor);
     }
 
-    executeAncestors(inputObject,args)
+    execute(inputObject,args) {
+        return this.filter.execute.apply(this.filter,arguments);
+    }
+
+}
+
+export class Pipe
+{
+    rootNode = [];
+
+    constructor(name,rootNode)
+    {
+        this.name = name;
+        this.rootNode = rootNode;
+    }
+
+    execute(inputObject,args)
+    {
+        return this.executeNode(this.rootNode,inputObject,args);
+    }
+
+    executeAncestors(node,inputObject,args)
     {
         var executeMethodResults = [];
-        for(var s in this.ancestors)
+        for(var s in node.ancestors)
         {
-            var filter = this.ancestors[s];
-            executeMethodResults.push(filter.execute(inputObject,args));
+            var ancestorPromise = this.executeNode(node.ancestors[s],inputObject,args);
+            executeMethodResults.push(ancestorPromise);
         }
+
         return Promise.all(executeMethodResults);
     }
 
@@ -39,48 +72,30 @@ export class TransformNode
         return extratedInputs;
     }
 
-    execute(inputObject,args)
+    executeNode(node,inputObject,args)
     {
         var executePromise = new Promise((res,rej)=>{
-            var inputPromise = this.executeAncestors(inputObject,args);
+            var inputPromise = this.executeAncestors(node,inputObject,args);
 
+            //Inputs should be an array of the results of executing the parent nodes
             inputPromise.then((inputs) =>{
 
-                //Inputs should be an array of the results of executing the parent nodes
                 // this lets us apply the function which should give the correct argument the correct value
                 var extractedInputs = this.extractInputs(inputs);
-
                 var inputForFunction = [inputObject].concat(extractedInputs);
-                var functionFilterExecutionResult = this.filter.execute.apply(this.filter,inputForFunction);
-                var functionFilterExecutionPromise = Promise.resolve(functionFilterExecutionResult);
+
+                var nodeExecutionResult = node.execute.apply(node,inputForFunction);
+
+                // We wrap the results of the execution in a resolve call as the result of a filter may or may not be a promise
+                var functionFilterExecutionPromise = Promise.resolve(nodeExecutionResult);
 
                 functionFilterExecutionPromise.then((i)=>{
-                    //let exInputs = this.extractInputs(i);
-
-                    //var result = [inputObject].concat(exInputs);
-
                     res(i);
                 })
             });
         });
 
         return executePromise;
-    }
-}
-
-export class Pipeline
-{
-    rootNode = [];
-
-    constructor(name,rootNode)
-    {
-        this.name = name;
-        this.rootNode = rootNode;
-    }
-
-    execute(inputObject,args)
-    {
-        return this.rootNode.execute(inputObject,args);
     }
 }
 
