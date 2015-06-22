@@ -1,0 +1,96 @@
+//import * as Enumerable from 'linq-es6'
+
+export class TransformNode
+{
+    ancestors = [];
+    filter = null;
+    name = 'unnamed TransformNode';
+
+    constructor(name,filter)
+    {
+        this.name = name;
+        this.filter = filter;
+    }
+
+    addInput(ancestor)
+    {
+        this.ancestors.push(ancestor);
+    }
+
+    execute(inputObject,args) {
+        return this.filter.execute.apply(this.filter,[inputObject].concat(args));
+    }
+
+}
+
+export class Pipe
+{
+    rootNode = [];
+
+    constructor(name,rootNode)
+    {
+        this.name = name;
+        this.rootNode = rootNode;
+    }
+
+    execute(inputObject,args)
+    {
+        return this.executeNode(this.rootNode,inputObject,args);
+    }
+
+    executeAncestors(node,inputObject,args)
+    {
+        var executeMethodResults = [];
+
+        node.ancestors.forEach((a)=>{
+            var ancestorPromise = this.executeNode(a,inputObject,args);
+            executeMethodResults.push(ancestorPromise);
+        });
+
+        return Promise.all(executeMethodResults);
+    }
+
+    extractInputs(inputs)
+    {
+        var extratedInputs = [];
+        inputs.forEach((s)=>{
+            extratedInputs.push(s);
+        });
+
+        return extratedInputs;
+    }
+
+    executeNode(node,inputObject,args)
+    {
+
+        var executePromise = new Promise((res,rej)=>{
+            var inputPromise = this.executeAncestors(node,inputObject,args);
+
+            //Inputs should be an array of the results of executing the parent nodes
+            inputPromise.then((inputs) =>{
+
+                // this lets us apply the function which should give the correct argument the correct value
+                if(inputs.length == 0 && args != null)
+                {
+                        inputs.push(args);
+                }
+
+                var extractedInputs = this.extractInputs(inputs);
+
+                var inputForFunction = [inputObject].concat(extractedInputs);
+
+                console.log('Executing ' + node.filter.name);
+                var nodeExecutionResult = node.execute(inputObject,extractedInputs);
+
+                // We wrap the results of the execution in a resolve call as the result of a filter may or may not be a promise
+                var functionFilterExecutionPromise = Promise.resolve(nodeExecutionResult);
+
+                functionFilterExecutionPromise.then((i)=>{
+                    res(i);
+                })
+            });
+        });
+
+        return executePromise;
+    }
+}
