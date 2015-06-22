@@ -18,6 +18,7 @@ export class TransformNode
     }
 
     execute(inputObject,args) {
+        console.log('Executing ' + this.filter.name);
         return this.filter.execute.apply(this.filter,[inputObject].concat(args));
     }
 
@@ -26,6 +27,7 @@ export class TransformNode
 export class Pipe
 {
     rootNode = [];
+    debugMessages = false;
 
     constructor(name,rootNode)
     {
@@ -35,6 +37,7 @@ export class Pipe
 
     execute(inputObject,args)
     {
+        console.log('Executing ' + this.name);
         return this.executeNode(this.rootNode,inputObject,args);
     }
 
@@ -42,11 +45,13 @@ export class Pipe
     {
         var executeMethodResults = [];
 
-        node.ancestors.forEach((a)=>{
-            var ancestorPromise = this.executeNode(a,inputObject,args);
-            executeMethodResults.push(ancestorPromise);
-        });
+        if(node.ancestors != null) {
 
+            node.ancestors.forEach((a)=> {
+                var ancestorPromise = this.executeNode(a, inputObject, args);
+                executeMethodResults.push(ancestorPromise);
+            });
+        }
         return Promise.all(executeMethodResults);
     }
 
@@ -79,7 +84,7 @@ export class Pipe
 
                 var inputForFunction = [inputObject].concat(extractedInputs);
 
-                console.log('Executing ' + node.filter.name);
+
                 var nodeExecutionResult = node.execute(inputObject,extractedInputs);
 
                 // We wrap the results of the execution in a resolve call as the result of a filter may or may not be a promise

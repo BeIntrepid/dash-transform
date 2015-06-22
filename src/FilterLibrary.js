@@ -1,6 +1,7 @@
 import Enumerable from 'linq-es6'
+import {TransformNode} from './Pipes'
 
-export class FilterLibrary
+export class TransformLibrary
 {
     filters = [];
 
@@ -12,5 +13,10 @@ export class FilterLibrary
     getFilter(filterName)
     {
         return Enumerable(this.filters).where((f)=>{f.name == filterName}).single();
+    }
+
+    getFilterWrapped(filterName)
+    {
+        return new TransformNode('',Enumerable(this.filters).where((f)=>{ return f.name == filterName}).single());
     }
 }
