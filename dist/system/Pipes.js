@@ -25,6 +25,7 @@ System.register([], function (_export) {
                 };
 
                 TransformNode.prototype.execute = function execute(inputObject, args) {
+                    console.log('Executing ' + this.filter.name);
                     return this.filter.execute.apply(this.filter, [inputObject].concat(args));
                 };
 
@@ -44,6 +45,7 @@ System.register([], function (_export) {
                 }
 
                 Pipe.prototype.execute = function execute(inputObject, args) {
+                    console.log('Executing ' + this.name);
                     return this.executeNode(this.rootNode, inputObject, args);
                 };
 
@@ -52,11 +54,13 @@ System.register([], function (_export) {
 
                     var executeMethodResults = [];
 
-                    node.ancestors.forEach(function (a) {
-                        var ancestorPromise = _this.executeNode(a, inputObject, args);
-                        executeMethodResults.push(ancestorPromise);
-                    });
+                    if (node.ancestors != null) {
 
+                        node.ancestors.forEach(function (a) {
+                            var ancestorPromise = _this.executeNode(a, inputObject, args);
+                            executeMethodResults.push(ancestorPromise);
+                        });
+                    }
                     return Promise.all(executeMethodResults);
                 };
 
@@ -84,8 +88,13 @@ System.register([], function (_export) {
 
                             var inputForFunction = [inputObject].concat(extractedInputs);
 
-                            console.log('Executing ' + node.filter.name);
-                            var nodeExecutionResult = node.execute(inputObject, extractedInputs);
+                            var nodeExecutionResult = null;
+
+                            if (node instanceof Pipe) {
+                                nodeExecutionResult = node.execute.apply(node, inputForFunction);
+                            } else {
+                                nodeExecutionResult = node.execute(inputObject, extractedInputs);
+                            }
 
                             var functionFilterExecutionPromise = Promise.resolve(nodeExecutionResult);
 
