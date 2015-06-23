@@ -1,7 +1,7 @@
-System.register(['./TransformLibrary', './Filters'], function (_export) {
+System.register(['./TransformLibrary', './Filters', './TransformConfig'], function (_export) {
     'use strict';
 
-    var TransformLibrary, FunctionFilter, TransformNode;
+    var TransformLibrary, FunctionFilter, TransformConfig, TransformNode;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -10,6 +10,8 @@ System.register(['./TransformLibrary', './Filters'], function (_export) {
             TransformLibrary = _TransformLibrary.TransformLibrary;
         }, function (_Filters) {
             FunctionFilter = _Filters.FunctionFilter;
+        }, function (_TransformConfig) {
+            TransformConfig = _TransformConfig.TransformConfig;
         }],
         execute: function () {
             TransformNode = (function () {
@@ -29,7 +31,8 @@ System.register(['./TransformLibrary', './Filters'], function (_export) {
                 };
 
                 TransformNode.prototype.execute = function execute(inputObject, args) {
-                    console.log('Executing ' + this.filter.name);
+                    if (TransformConfig.enableDebugMessages) console.log('Executing ' + this.filter.name);
+
                     return this.filter.execute.apply(this.filter, [inputObject].concat(args));
                 };
 

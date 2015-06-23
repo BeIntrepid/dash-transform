@@ -1,7 +1,7 @@
-System.register(['./TransformLibrary', './Filters', './Nodes'], function (_export) {
+System.register(['./TransformLibrary', './Filters', './Nodes', './TransformConfig'], function (_export) {
     'use strict';
 
-    var TransformLibrary, FunctionFilter, TransformNode, Pipe;
+    var TransformLibrary, FunctionFilter, TransformNode, TransformConfig, Pipe;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -12,6 +12,8 @@ System.register(['./TransformLibrary', './Filters', './Nodes'], function (_expor
             FunctionFilter = _Filters.FunctionFilter;
         }, function (_Nodes) {
             TransformNode = _Nodes.TransformNode;
+        }, function (_TransformConfig) {
+            TransformConfig = _TransformConfig.TransformConfig;
         }],
         execute: function () {
             Pipe = (function () {
@@ -28,7 +30,7 @@ System.register(['./TransformLibrary', './Filters', './Nodes'], function (_expor
 
                     var n = null;
                     if (filterObj instanceof Function) {
-                        n = new TransformNode('NoName', new FunctionFilter('GetDataArray', filterObj));
+                        n = new TransformNode('NoName', new FunctionFilter('Implicit Pipe', filterObj));
                     } else if (filterObj instanceof TransformNode) {
                         n = filterObj;
                     } else if (typeof filterObj == 'string') {
@@ -48,7 +50,7 @@ System.register(['./TransformLibrary', './Filters', './Nodes'], function (_expor
                 };
 
                 Pipe.prototype.execute = function execute(inputObject, args) {
-                    console.log('Executing ' + this.name);
+                    if (TransformConfig.enableDebugMessages) console.log('Executing ' + this.name);
                     return this.executeNode(this.rootNode, inputObject, args);
                 };
 

@@ -1,5 +1,6 @@
 import {TransformLibrary} from './TransformLibrary'
 import {FunctionFilter} from './Filters'
+import {TransformConfig} from './TransformConfig'
 
 export class TransformNode
 {
@@ -19,7 +20,8 @@ export class TransformNode
     }
 
     execute(inputObject,args) {
-        console.log('Executing ' + this.filter.name);
+        if(TransformConfig.enableDebugMessages) console.log('Executing ' + this.filter.name);
+
         return this.filter.execute.apply(this.filter,[inputObject].concat(args));
     }
 }

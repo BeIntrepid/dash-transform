@@ -1,6 +1,7 @@
 import {TransformLibrary} from './TransformLibrary'
 import {FunctionFilter} from './Filters'
 import {TransformNode} from './Nodes'
+import {TransformConfig} from './TransformConfig'
 
 export class Pipe
 {
@@ -18,7 +19,7 @@ export class Pipe
         var n = null;
         if(filterObj instanceof Function)
         {
-            n = new TransformNode('NoName',new FunctionFilter('GetDataArray',filterObj));
+            n = new TransformNode('NoName',new FunctionFilter('Implicit Pipe',filterObj));
         }
         else if(filterObj instanceof TransformNode)
         {
@@ -46,7 +47,7 @@ export class Pipe
 
     execute(inputObject,args)
     {
-        console.log('Executing ' + this.name);
+        if(TransformConfig.enableDebugMessages) console.log('Executing ' + this.name);
         return this.executeNode(this.rootNode,inputObject,args);
     }
 

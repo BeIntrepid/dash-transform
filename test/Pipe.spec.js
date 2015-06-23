@@ -2,7 +2,7 @@ import * as transform from '../src/index';
 
 class TestConfig
 {
-    static dontExecute = false;
+    static dontExecute = true;
 }
 
 describe('a first test suite', () => {
@@ -174,6 +174,27 @@ describe('a first test suite', () => {
             pipeline .execute('Input').then((o)=>{
                 console.log(o + '| ' + Util.equals([5,10,15,20],o));
             });
+        });
+    });
+
+    describe('Building Stream', () => {
+        it("should run and pass", () => {
+            //if(TestConfig.dontExecute) return;
+
+            var pipeline = new transform.Pipe('Simple Pipe');
+
+            pipeline.add((pipeInput)=>{return pipeInput.in;})
+                    .add((pipeInput,i)=>{
+                    return i + 1;
+                });
+
+            var stream = new transform.Stream(pipeline);
+
+            stream.subscribe((o)=>{
+                console.log(o);
+            });
+
+            stream.start({interval : 1000});
         });
     });
 });
