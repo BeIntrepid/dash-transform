@@ -3,4 +3,4 @@
 export * from './Filters'
 export * from './Pipes'
 export * from './Stream'
-export * from './FilterLibrary'
+export * from './TransformLibrary'

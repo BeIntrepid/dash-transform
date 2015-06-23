@@ -21,13 +21,11 @@ export class TransformNode
         console.log('Executing ' + this.filter.name);
         return this.filter.execute.apply(this.filter,[inputObject].concat(args));
     }
-
 }
 
 export class Pipe
 {
     rootNode = [];
-    debugMessages = false;
 
     constructor(name,rootNode)
     {
@@ -84,8 +82,19 @@ export class Pipe
 
                 var inputForFunction = [inputObject].concat(extractedInputs);
 
+                var nodeExecutionResult = null;
 
-                var nodeExecutionResult = node.execute(inputObject,extractedInputs);
+                // Todo : Figure out how to type check this
+                if(node instanceof PipeBase)
+                {
+                    nodeExecutionResult = node.execute.apply(node,inputForFunction);
+                }
+                else
+                {
+                    nodeExecutionResult = node.execute(inputObject,extractedInputs);
+                }
+
+
 
                 // We wrap the results of the execution in a resolve call as the result of a filter may or may not be a promise
                 var functionFilterExecutionPromise = Promise.resolve(nodeExecutionResult);

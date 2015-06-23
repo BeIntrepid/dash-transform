@@ -5,7 +5,7 @@ describe('a first test suite', () => {
         it("should run and pass", () => {
             var filterLib = new transform.TransformLibrary();
             new Util.registerFilters(filterLib);
-
+return;
             var pr = filterLib.getFilterWrapped('GetDataArray');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
 
@@ -18,7 +18,6 @@ describe('a first test suite', () => {
 
     describe('chained filters', () => {
         it("should run and pass", () => {
-
             var filterLib = new transform.TransformLibrary();
             Util.registerFilters(filterLib);
 
@@ -34,7 +33,6 @@ describe('a first test suite', () => {
 
     describe('chained filters', () => {
         it("should run and pass", () => {
-
             var filterLib = new transform.TransformLibrary();
             Util.registerFilters(filterLib);
 
@@ -55,7 +53,6 @@ describe('a first test suite', () => {
 
     describe('pipe inside pipe', () => {
         it("should run and pass", () => {
-
             var filterLib = new transform.TransformLibrary();
             Util.registerFilters(filterLib);
 
@@ -67,6 +64,70 @@ describe('a first test suite', () => {
 
             pipeWithPipeInput.execute('Input').then((o)=>{
                 console.log(Util.equals([1,2,3,4],o));
+            });
+        });
+    });
+
+    describe('Input pipe', () => {
+        it("should run and pass", () => {
+
+            var filterLib = new transform.TransformLibrary();
+            Util.registerFilters(filterLib);
+
+            var pr = filterLib.getFilterWrapped('IncrementInput');
+            var dep = filterLib.getFilterWrapped('IncrementInput');
+            pr.addInput(dep);
+            dep = pr;
+            pr = filterLib.getFilterWrapped('IncrementInput');
+            pr.addInput(dep);
+            dep = pr;
+
+            var pipeline = new transform.Pipe('Simple Pipe',dep);
+
+            var pipeWithPipeInput = new transform.Pipe('DependentPipe',pipeline);
+
+            pipeWithPipeInput.execute('Input',1).then((o)=>{
+                console.log(o);
+            });
+        });
+    });
+
+    describe('2 filter input dependencies', () => {
+        it("should run and pass", () => {
+            var filterLib = new transform.TransformLibrary();
+            Util.registerFilters(filterLib);
+
+            var pr = filterLib.getFilterWrapped('MultiplyArrayByValue');
+            pr.addInput(filterLib.getFilterWrapped('GetDataArray'));
+            pr.addInput(filterLib.getFilterWrapped('GetFive'));
+            var pipeline = new transform.Pipe('Simple Pipe',pr);
+
+            pipeline .execute('Input').then((o)=>{
+                console.log(Util.equals([5,10,15,20],o));
+            });
+        });
+    });
+
+    describe('2 pipe input dependencies', () => {
+        it("should run and pass", () => {
+return;
+            var filterLib = new transform.TransformLibrary();
+            Util.registerFilters(filterLib);
+
+            var pr = filterLib.getFilterWrapped('MultiplyArrayByValue');
+            var pipeline = new transform.Pipe('Simple Pipe',pr);
+
+            var pInput1 = filterLib.getFilterWrapped('GetDataArray');
+            var pipelineInput1 = new transform.Pipe('Simple Pipe',pInput1);
+
+            var pInput2 = filterLib.getFilterWrapped('GetFive');
+            var pipelineInput2 = new transform.Pipe('Simple Pipe',pInput2);
+
+            pr.addInput(pipelineInput1);
+            pr.addInput(pipelineInput2);
+
+            pipeline .execute('Input').then((o)=>{
+                console.log(o + '| ' + Util.equals([5,10,15,20],o));
             });
         });
     });
@@ -102,6 +163,23 @@ class Util
     {
         filterLib.registerFilter(new transform.FunctionFilter('GetDataArray',(input,i)=>{
             return [1,2,3,4];
+        }));
+
+        filterLib.registerFilter(new transform.FunctionFilter('IncrementInput',(input,i)=>{
+            return i + 1;
+        }));
+
+        filterLib.registerFilter(new transform.FunctionFilter('GetFive',(input,i)=>{
+            return 5;
+        }));
+
+        filterLib.registerFilter(new transform.FunctionFilter('MultiplyArrayByValue',function(inputObject,array,value){
+
+            for(var i = 0; i < array.length; i++)
+            {
+                array[i] = array[i] * value;
+            }
+            return array;
         }));
 
         filterLib.registerFilter(new transform.FunctionFilter('MultiplyArray',function(inputObject,array){
