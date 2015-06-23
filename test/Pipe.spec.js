@@ -5,7 +5,6 @@ describe('a first test suite', () => {
         it("should run and pass", () => {
             var filterLib = new transform.TransformLibrary();
             new Util.registerFilters(filterLib);
-return;
             var pr = filterLib.getFilterWrapped('GetDataArray');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
 

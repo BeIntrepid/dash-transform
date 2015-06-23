@@ -85,7 +85,7 @@ export class Pipe
                 var nodeExecutionResult = null;
 
                 // Todo : Figure out how to type check this
-                if(node instanceof PipeBase)
+                if(node instanceof Pipe)
                 {
                     nodeExecutionResult = node.execute.apply(node,inputForFunction);
                 }
