@@ -1,4 +1,4 @@
-System.register(['./Filters', './Pipes', './Stream', './TransformLibrary'], function (_export) {
+System.register(['./Filters', './Pipes', './Stream', './TransformLibrary', './Nodes'], function (_export) {
   'use strict';
 
   return {
@@ -17,6 +17,10 @@ System.register(['./Filters', './Pipes', './Stream', './TransformLibrary'], func
     }, function (_TransformLibrary) {
       for (var _key4 in _TransformLibrary) {
         _export(_key4, _TransformLibrary[_key4]);
+      }
+    }, function (_Nodes) {
+      for (var _key5 in _Nodes) {
+        _export(_key5, _Nodes[_key5]);
       }
     }],
     execute: function () {}

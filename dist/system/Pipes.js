@@ -1,39 +1,19 @@
-System.register([], function (_export) {
+System.register(['./TransformLibrary', './Filters', './Nodes'], function (_export) {
     'use strict';
 
-    var TransformNode, Pipe;
+    var TransformLibrary, FunctionFilter, TransformNode, Pipe;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
     return {
-        setters: [],
+        setters: [function (_TransformLibrary) {
+            TransformLibrary = _TransformLibrary.TransformLibrary;
+        }, function (_Filters) {
+            FunctionFilter = _Filters.FunctionFilter;
+        }, function (_Nodes) {
+            TransformNode = _Nodes.TransformNode;
+        }],
         execute: function () {
-            TransformNode = (function () {
-                function TransformNode(name, filter) {
-                    _classCallCheck(this, TransformNode);
-
-                    this.ancestors = [];
-                    this.filter = null;
-                    this.name = 'unnamed TransformNode';
-
-                    this.name = name;
-                    this.filter = filter;
-                }
-
-                TransformNode.prototype.addInput = function addInput(ancestor) {
-                    this.ancestors.push(ancestor);
-                };
-
-                TransformNode.prototype.execute = function execute(inputObject, args) {
-                    console.log('Executing ' + this.filter.name);
-                    return this.filter.execute.apply(this.filter, [inputObject].concat(args));
-                };
-
-                return TransformNode;
-            })();
-
-            _export('TransformNode', TransformNode);
-
             Pipe = (function () {
                 function Pipe(name, rootNode) {
                     _classCallCheck(this, Pipe);
@@ -43,6 +23,29 @@ System.register([], function (_export) {
                     this.name = name;
                     this.rootNode = rootNode;
                 }
+
+                Pipe.prototype.add = function add(filterObj) {
+
+                    var n = null;
+                    if (filterObj instanceof Function) {
+                        n = new TransformNode('NoName', new FunctionFilter('GetDataArray', filterObj));
+                    } else if (filterObj instanceof TransformNode) {
+                        n = filterObj;
+                    } else if (typeof filterObj == 'string') {
+                        var tl = new TransformLibrary();
+                        n = tl.getFilterWrapped(filterObj);
+                    }
+
+                    if (this.rootNode != null) {
+                        var rn = this.rootNode;
+                        this.rootNode = n;
+                        this.rootNode.addInput(rn);
+                    } else {
+                        this.rootNode = n;
+                    }
+
+                    return this;
+                };
 
                 Pipe.prototype.execute = function execute(inputObject, args) {
                     console.log('Executing ' + this.name);
@@ -85,16 +88,9 @@ System.register([], function (_export) {
                             }
 
                             var extractedInputs = _this2.extractInputs(inputs);
-
                             var inputForFunction = [inputObject].concat(extractedInputs);
 
-                            var nodeExecutionResult = null;
-
-                            if (node instanceof Pipe) {
-                                nodeExecutionResult = node.execute.apply(node, inputForFunction);
-                            } else {
-                                nodeExecutionResult = node.execute(inputObject, extractedInputs);
-                            }
+                            var nodeExecutionResult = node instanceof Pipe ? node.execute.apply(node, inputForFunction) : nodeExecutionResult = node.execute(inputObject, extractedInputs);
 
                             var functionFilterExecutionPromise = Promise.resolve(nodeExecutionResult);
 
