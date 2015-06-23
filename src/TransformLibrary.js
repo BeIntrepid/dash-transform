@@ -1,5 +1,5 @@
 import Enumerable from 'linq-es6'
-import {TransformNode} from './Pipes'
+import {TransformNode} from './Nodes'
 
 export class TransformLibrary
 {

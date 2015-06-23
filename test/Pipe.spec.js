@@ -2,7 +2,7 @@ import * as transform from '../src/index';
 
 class TestConfig
 {
-    static dontExecute = true;
+    static dontExecute = false;
 }
 
 describe('a first test suite', () => {
@@ -36,16 +36,12 @@ describe('a first test suite', () => {
             pipeline .execute('Input').then((o)=>{
                 console.log(Util.equals([1,2,3,4],o));
             });
-
         });
     });
 
     describe('Test pipe.add', () => {
         it("should run and pass", () => {
-            //if(TestConfig.dontExecute) return;
-
-            var filterLib = new transform.TransformLibrary();
-            new Util.registerFilters(filterLib);
+            if(TestConfig.dontExecute) return;
 
             var pipeline = new transform.Pipe('Simple Pipe');
 

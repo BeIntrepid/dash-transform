@@ -1,28 +1,6 @@
 import {TransformLibrary} from './TransformLibrary'
 import {FunctionFilter} from './Filters'
-
-export class TransformNode
-{
-    ancestors = [];
-    filter = null;
-    name = 'unnamed TransformNode';
-
-    constructor(name,filter)
-    {
-        this.name = name;
-        this.filter = filter;
-    }
-
-    addInput(ancestor)
-    {
-        this.ancestors.push(ancestor);
-    }
-
-    execute(inputObject,args) {
-        console.log('Executing ' + this.filter.name);
-        return this.filter.execute.apply(this.filter,[inputObject].concat(args));
-    }
-}
+import {TransformNode} from './Nodes'
 
 export class Pipe
 {
@@ -42,13 +20,11 @@ export class Pipe
         {
             n = new TransformNode('NoName',new FunctionFilter('GetDataArray',filterObj));
         }
-
-        if(filterObj instanceof TransformNode)
+        else if(filterObj instanceof TransformNode)
         {
             n = filterObj;
         }
-
-        if(typeof(filterObj) == "string")
+        else if(typeof(filterObj) == "string")
         {
             var tl = new TransformLibrary();
             n = tl.getFilterWrapped(filterObj);
@@ -114,22 +90,11 @@ export class Pipe
                 }
 
                 var extractedInputs = this.extractInputs(inputs);
-
                 var inputForFunction = [inputObject].concat(extractedInputs);
 
-                var nodeExecutionResult = null;
-
-                // Todo : Figure out how to type check this
-                if(node instanceof Pipe)
-                {
-                    nodeExecutionResult = node.execute.apply(node,inputForFunction);
-                }
-                else
-                {
+                var nodeExecutionResult = node instanceof Pipe ?
+                    node.execute.apply(node,inputForFunction) :
                     nodeExecutionResult = node.execute(inputObject,extractedInputs);
-                }
-
-
 
                 // We wrap the results of the execution in a resolve call as the result of a filter may or may not be a promise
                 var functionFilterExecutionPromise = Promise.resolve(nodeExecutionResult);
