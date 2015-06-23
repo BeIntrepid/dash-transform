@@ -1,4 +1,5 @@
-//import * as Enumerable from 'linq-es6'
+import {TransformLibrary} from './TransformLibrary'
+import {FunctionFilter} from './Filters'
 
 export class TransformNode
 {
@@ -31,6 +32,40 @@ export class Pipe
     {
         this.name = name;
         this.rootNode = rootNode;
+    }
+
+    add(filterObj)
+    {
+
+        var n = null;
+        if(filterObj instanceof Function)
+        {
+            n = new TransformNode('NoName',new FunctionFilter('GetDataArray',filterObj));
+        }
+
+        if(filterObj instanceof TransformNode)
+        {
+            n = filterObj;
+        }
+
+        if(typeof(filterObj) == "string")
+        {
+            var tl = new TransformLibrary();
+            n = tl.getFilterWrapped(filterObj);
+        }
+
+        if(this.rootNode != null)
+        {
+            var rn = this.rootNode;
+            this.rootNode = n;
+            this.rootNode.addInput(rn);
+        }
+        else
+        {
+            this.rootNode = n;
+        }
+
+        return this;
     }
 
     execute(inputObject,args)

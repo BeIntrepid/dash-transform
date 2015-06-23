@@ -3,20 +3,21 @@ import {TransformNode} from './Pipes'
 
 export class TransformLibrary
 {
-    filters = [];
+
+    static filters = [];
 
     registerFilter(filter)
     {
-        this.filters.push(filter);
+        TransformLibrary.filters.push(filter);
     }
 
     getFilter(filterName)
     {
-        return Enumerable(this.filters).where((f)=>{f.name == filterName}).single();
+        return Enumerable(TransformLibrary.filters).where((f)=>{f.name == filterName}).single();
     }
 
     getFilterWrapped(filterName)
     {
-        return new TransformNode('',Enumerable(this.filters).where((f)=>{ return f.name == filterName}).single());
+        return new TransformNode('',Enumerable(TransformLibrary.filters).where((f)=>{ return f.name == filterName}).single());
     }
 }

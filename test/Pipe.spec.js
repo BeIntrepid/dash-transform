@@ -1,10 +1,35 @@
 import * as transform from '../src/index';
 
+class TestConfig
+{
+    static dontExecute = true;
+}
+
 describe('a first test suite', () => {
+
     describe('Simple Pipe', () => {
         it("should run and pass", () => {
+
+            if(TestConfig.dontExecute) return;
+
             var filterLib = new transform.TransformLibrary();
             new Util.registerFilters(filterLib);
+            var pr = filterLib.getFilterWrapped('GetDataArray');
+            var pipeline = new transform.Pipe('Print Result',pr);
+
+            pipeline .execute({first: 'asdf', second : 2}).then((o)=>{
+                console.log(Util.equals([1,2,3,4],o));
+            });
+
+        });
+    });
+
+    describe('Simple Pipe', () => {
+        it("should run and pass", () => {
+
+            if(TestConfig.dontExecute) return;
+
+            var filterLib = new transform.TransformLibrary();
             var pr = filterLib.getFilterWrapped('GetDataArray');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
 
@@ -15,10 +40,32 @@ describe('a first test suite', () => {
         });
     });
 
+    describe('Test pipe.add', () => {
+        it("should run and pass", () => {
+            //if(TestConfig.dontExecute) return;
+
+            var filterLib = new transform.TransformLibrary();
+            new Util.registerFilters(filterLib);
+
+            var pipeline = new transform.Pipe('Simple Pipe');
+
+            pipeline.add(()=>{return 5;})
+                    .add((pipeInput,i)=>{return i + 1;})
+                    .add('IncrementInput');
+
+            pipeline.execute('Input').then((o)=>{
+                console.log(o);
+            });
+
+        });
+    });
+
+
     describe('chained filters', () => {
         it("should run and pass", () => {
+            if(TestConfig.dontExecute) return;
+
             var filterLib = new transform.TransformLibrary();
-            Util.registerFilters(filterLib);
 
             var pr = filterLib.getFilterWrapped('MultiplyArray');
             pr.addInput(filterLib.getFilterWrapped('GetDataArray'));
@@ -32,8 +79,9 @@ describe('a first test suite', () => {
 
     describe('chained filters', () => {
         it("should run and pass", () => {
+            if(TestConfig.dontExecute) return;
+
             var filterLib = new transform.TransformLibrary();
-            Util.registerFilters(filterLib);
 
             var pr = filterLib.getFilterWrapped('GetDataArray');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
@@ -52,8 +100,9 @@ describe('a first test suite', () => {
 
     describe('pipe inside pipe', () => {
         it("should run and pass", () => {
+            if(TestConfig.dontExecute) return;
+
             var filterLib = new transform.TransformLibrary();
-            Util.registerFilters(filterLib);
 
             var pr = filterLib.getFilterWrapped('GetDataArray');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
@@ -69,9 +118,9 @@ describe('a first test suite', () => {
 
     describe('Input pipe', () => {
         it("should run and pass", () => {
+            if(TestConfig.dontExecute) return;
 
             var filterLib = new transform.TransformLibrary();
-            Util.registerFilters(filterLib);
 
             var pr = filterLib.getFilterWrapped('IncrementInput');
             var dep = filterLib.getFilterWrapped('IncrementInput');
@@ -93,8 +142,9 @@ describe('a first test suite', () => {
 
     describe('2 filter input dependencies', () => {
         it("should run and pass", () => {
+            if(TestConfig.dontExecute) return;
+
             var filterLib = new transform.TransformLibrary();
-            Util.registerFilters(filterLib);
 
             var pr = filterLib.getFilterWrapped('MultiplyArrayByValue');
             pr.addInput(filterLib.getFilterWrapped('GetDataArray'));
@@ -109,9 +159,9 @@ describe('a first test suite', () => {
 
     describe('2 pipe input dependencies', () => {
         it("should run and pass", () => {
-return;
+            if(TestConfig.dontExecute) return;
+
             var filterLib = new transform.TransformLibrary();
-            Util.registerFilters(filterLib);
 
             var pr = filterLib.getFilterWrapped('MultiplyArrayByValue');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
