@@ -25,6 +25,10 @@ export class Pipe
         {
             n = filterObj;
         }
+        else if(filterObj instanceof Filter)
+        {
+            n = new TransformNode('NoName',filterObj);
+        }
         else if(typeof(filterObj) == "string")
         {
             var tl = new TransformLibrary();

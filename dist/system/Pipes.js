@@ -33,6 +33,8 @@ System.register(['./TransformLibrary', './Filters', './Nodes', './TransformConfi
                         n = new TransformNode('NoName', new FunctionFilter('Implicit Pipe', filterObj));
                     } else if (filterObj instanceof TransformNode) {
                         n = filterObj;
+                    } else if (filterObj instanceof Filter) {
+                        n = new TransformNode('NoName', filterObj);
                     } else if (typeof filterObj == 'string') {
                         var tl = new TransformLibrary();
                         n = tl.getFilterWrapped(filterObj);
