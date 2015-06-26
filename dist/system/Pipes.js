@@ -1,7 +1,7 @@
 System.register(['./TransformLibrary', './Filters', './Nodes', './TransformConfig'], function (_export) {
     'use strict';
 
-    var TransformLibrary, FunctionFilter, TransformNode, TransformConfig, Pipe;
+    var TransformLibrary, FunctionFilter, Filter, TransformNode, TransformConfig, Pipe;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -10,6 +10,7 @@ System.register(['./TransformLibrary', './Filters', './Nodes', './TransformConfi
             TransformLibrary = _TransformLibrary.TransformLibrary;
         }, function (_Filters) {
             FunctionFilter = _Filters.FunctionFilter;
+            Filter = _Filters.Filter;
         }, function (_Nodes) {
             TransformNode = _Nodes.TransformNode;
         }, function (_TransformConfig) {

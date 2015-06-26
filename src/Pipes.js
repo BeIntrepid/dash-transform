@@ -1,5 +1,6 @@
 import {TransformLibrary} from './TransformLibrary'
 import {FunctionFilter} from './Filters'
+import {Filter} from './Filters'
 import {TransformNode} from './Nodes'
 import {TransformConfig} from './TransformConfig'
 
