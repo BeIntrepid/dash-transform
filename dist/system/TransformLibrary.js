@@ -21,6 +21,7 @@ System.register(['linq-es6', './Nodes'], function (_export) {
 
                 TransformLibrary.prototype.registerFilter = function registerFilter(filter) {
                     TransformLibrary.filters.push(filter);
+                    return filter;
                 };
 
                 TransformLibrary.prototype.getFilter = function getFilter(filterName) {

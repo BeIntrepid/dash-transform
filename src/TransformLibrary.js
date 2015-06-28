@@ -9,6 +9,7 @@ export class TransformLibrary
     registerFilter(filter)
     {
         TransformLibrary.filters.push(filter);
+        return filter;
     }
 
     getFilter(filterName)
