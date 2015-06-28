@@ -3,8 +3,8 @@ import {TransformNode} from './Nodes'
 
 export class TransformLibrary
 {
-
     static filters = [];
+    static pipes = [];
 
     registerFilter(filter)
     {
@@ -19,5 +19,20 @@ export class TransformLibrary
     getFilterWrapped(filterName)
     {
         return new TransformNode('',Enumerable(TransformLibrary.filters).where((f)=>{ return f.name == filterName}).single());
+    }
+
+    registerPipe(pipe)
+    {
+        TransformLibrary.pipes.push(pipe);
+    }
+
+    getPipe(pipeName)
+    {
+        return Enumerable(TransformLibrary.pipes).where((f)=>{f.name == pipeName}).single();
+    }
+
+    getPipeWrapped(pipeName)
+    {
+        return new TransformNode('',Enumerable(TransformLibrary.pipes).where((f)=>{ return f.name == pipeName}).single());
     }
 }

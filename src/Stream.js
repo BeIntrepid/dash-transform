@@ -1,4 +1,6 @@
 import * as filters from './Filters'
+import {Pipe} from './Pipes'
+import {TransformNode} from './Nodes'
 
 export class Stream
 {
@@ -13,7 +15,19 @@ export class Stream
 
     constructor(pipe)
     {
-        this.pipe = pipe;
+        // Make sure we're not referencing the pipe directly
+        let wrappedPipe;
+        if(pipe instanceof TransformNode)
+        {
+            wrappedPipe = pipe
+        }
+        else if(pipe instanceof filters.Filter ||
+                pipe instanceof Pipe)
+        {
+            wrappedPipe = new TransformNode('',pipe);
+        }
+
+        this.pipe = wrappedPipe;
         this.setInput(this.input);
     }
 
@@ -53,6 +67,9 @@ export class Stream
             }
 
             if (startArgs.interval != null) {
+
+                this.execute.bind(this)();
+
                 this.subscriptionTimeout = setInterval(this.execute.bind(this), startArgs.interval);
             }
         }

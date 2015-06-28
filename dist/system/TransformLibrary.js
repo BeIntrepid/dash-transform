@@ -35,8 +35,28 @@ System.register(['linq-es6', './Nodes'], function (_export) {
                     }).single());
                 };
 
+                TransformLibrary.prototype.registerPipe = function registerPipe(pipe) {
+                    TransformLibrary.pipes.push(pipe);
+                };
+
+                TransformLibrary.prototype.getPipe = function getPipe(pipeName) {
+                    return Enumerable(TransformLibrary.pipes).where(function (f) {
+                        f.name == pipeName;
+                    }).single();
+                };
+
+                TransformLibrary.prototype.getPipeWrapped = function getPipeWrapped(pipeName) {
+                    return new TransformNode('', Enumerable(TransformLibrary.pipes).where(function (f) {
+                        return f.name == pipeName;
+                    }).single());
+                };
+
                 _createClass(TransformLibrary, null, [{
                     key: 'filters',
+                    value: [],
+                    enumerable: true
+                }, {
+                    key: 'pipes',
                     value: [],
                     enumerable: true
                 }]);

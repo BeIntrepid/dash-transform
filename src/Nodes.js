@@ -20,7 +20,7 @@ export class TransformNode
     }
 
     execute(inputObject,args) {
-        if(TransformConfig.enableDebugMessages) console.log('Executing ' + this.filter.name);
+        if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.filter.name);
 
         return this.filter.execute.apply(this.filter,[inputObject].concat(args));
     }

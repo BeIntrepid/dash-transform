@@ -1,13 +1,17 @@
-System.register(['./Filters'], function (_export) {
+System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
     'use strict';
 
-    var filters, Stream;
+    var filters, Pipe, TransformNode, Stream;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
     return {
         setters: [function (_Filters) {
             filters = _Filters;
+        }, function (_Pipes) {
+            Pipe = _Pipes.Pipe;
+        }, function (_Nodes) {
+            TransformNode = _Nodes.TransformNode;
         }],
         execute: function () {
             Stream = (function () {
@@ -23,7 +27,14 @@ System.register(['./Filters'], function (_export) {
                     this.bindedInputChanged = this.inputChanged.bind(this);
                     this.subscriptionTimeout = null;
 
-                    this.pipe = pipe;
+                    var wrappedPipe = undefined;
+                    if (pipe instanceof TransformNode) {
+                        wrappedPipe = pipe;
+                    } else if (pipe instanceof filters.Filter || pipe instanceof Pipe) {
+                        wrappedPipe = new TransformNode('', pipe);
+                    }
+
+                    this.pipe = wrappedPipe;
                     this.setInput(this.input);
                 }
 
@@ -57,6 +68,9 @@ System.register(['./Filters'], function (_export) {
                         }
 
                         if (startArgs.interval != null) {
+
+                            this.execute.bind(this)();
+
                             this.subscriptionTimeout = setInterval(this.execute.bind(this), startArgs.interval);
                         }
                     }
