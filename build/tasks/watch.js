@@ -14,4 +14,5 @@ function reportChange(event){
 gulp.task('watch',function() {
   gulp.watch(paths.source,function(){ runSequence('updateJspmLocalLink');});
   gulp.watch(paths.html,function(){ runSequence('updateJspmLocalLink');});
+  gulp.watch(paths.style,function(){ runSequence('updateJspmLocalLink');});
 });

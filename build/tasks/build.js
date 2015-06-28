@@ -18,6 +18,12 @@ gulp.task('build-html', function () {
     .pipe(gulp.dest(paths.output + 'system'));
 });
 
+gulp.task('build-style', function () {
+  return gulp.src(paths.style)
+    .pipe(changed(paths.output, {extension: '.css'}))
+    .pipe(gulp.dest(paths.output + 'system/' + 'styles'));
+});
+
 gulp.task('build-commonjs', function () {
   return gulp.src(paths.source)
     .pipe(to5(assign({}, compilerOptions, {modules:'common'})))
@@ -39,7 +45,7 @@ gulp.task('build-system', function () {
 gulp.task('build', function(callback) {
   return runSequence(
     'clean',
-    [/* 'build-es6', 'build-commonjs', 'build-amd',*/ 'build-system','build-html'],
+    [/* 'build-es6', 'build-commonjs', 'build-amd',*/ 'build-system','build-html','build-style'],
     callback
   );
 });
