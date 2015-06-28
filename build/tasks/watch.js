@@ -13,4 +13,5 @@ function reportChange(event){
 // serve task, it will instantiate a browserSync session
 gulp.task('watch',function() {
   gulp.watch(paths.source,function(){ runSequence('updateJspmLocalLink');});
+  gulp.watch(paths.html,function(){ runSequence('updateJspmLocalLink');});
 });
