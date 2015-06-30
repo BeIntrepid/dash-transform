@@ -102,12 +102,80 @@ export class Stream
     {
         this.busy = true;
         var streamPromise = new Promise((res,rej)=>{
-            this.pipe.execute(args == null ? this.input : args).then(this.onPipeExecuted.bind(this)).then((i)=>{
+            var executePromise = this.pipe.execute(args == null ? this.input : args);
+            executePromise.then(this.onPipeExecuted.bind(this));
+            executePromise.then((i)=>{
                 this.busy = false;
                 res(i);
             });
         });
 
         return streamPromise;
+    }
+
+    buildInputSpec()
+    {
+        var inputTree = {};
+        var spec = {};
+        inputTree  = this.pipe.buildInputSpec(inputTree,this.pipe.rootNode);
+
+        // traverse the inputTree, trying To Flatten it
+
+        console.log(JSON.parse(JSON.stringify(inputTree)));
+        var flattenedInputs = {};
+        this.traverseInputSpec(flattenedInputs,'',inputTree);
+        return flattenedInputs;
+
+    }
+
+    traverseInputSpec(flattenedInputs,scopeName,inputNode)
+    {
+        var currentScopeName = this.buildInputName(scopeName,inputNode.name);
+        inputNode.ancestors.forEach((n)=>{
+            this.traverseInputSpec(flattenedInputs,currentScopeName  ,n);
+        });
+
+        inputNode.inputs.forEach((inputObj)=>{
+            inputObj.forEach((iObj)=>{
+                this.resolveInputName(flattenedInputs,currentScopeName ,iObj);
+            });
+        })
+
+    }
+
+    buildInputName(scopeName,inputName)
+    {
+        return (scopeName.length > 0 ? scopeName + '.' : '') + inputName;
+    }
+
+    resolveInputName(flattenedInputs,scopeName,currentObj)
+    {
+        var name = this.buildInputName(scopeName,currentObj.name);
+
+        var valueName = null;
+        if(flattenedInputs[name] != null)
+        {
+            valueName = this.incrementScopeName(flattenedInputs,scopeName,currentObj.name);
+        }
+        else
+        {
+            valueName = name;
+        }
+
+        flattenedInputs[valueName] = 0;
+    }
+
+    incrementScopeName(flattenedInputs,scopeName,inputName)
+    {
+        var i = 1;
+        while(true)
+        {
+            var testName = this.buildInputName(scopeName + i,inputName);
+            if(!flattenedInputs[testName])
+            {
+                return testName;
+            }
+            i = i + 1;
+        }
     }
 }

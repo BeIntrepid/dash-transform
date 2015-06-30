@@ -3,6 +3,7 @@ import {FunctionFilter} from './Filters'
 import {Filter} from './Filters'
 import {TransformNode} from './Nodes'
 import {TransformConfig} from './TransformConfig'
+import {InputSpec} from './InputSpec'
 
 export class Pipe
 {
@@ -55,6 +56,38 @@ export class Pipe
         if(TransformConfig.enableDebugMessages) console.log('Executing ' + this.name);
         return this.executeNode(this.rootNode,inputObject,args);
     }
+
+    buildNodeInputSpec(parentSpec,node,f)
+    {
+
+        if(node.ancestors != null) {
+            node.ancestors.forEach((a)=> {
+                this.traverseAncestors(node, a);
+            });
+
+            f(node);
+        }
+    }
+
+    buildInputSpec(parentSpec,node)
+    {
+        if(TransformConfig.enableDebugMessages) console.log('Building InputSpec for ' + this.name);
+
+        if(node == null)
+        {
+            node = this.rootNode;
+        }
+
+        var nodeSpec = new InputSpec(node.pipe.name,[],[]);
+
+            node.ancestors.forEach((a)=> {
+                nodeSpec.ancestors.push(this.buildInputSpec(nodeSpec, a));
+            });
+
+            nodeSpec.inputs.push(node.buildInputSpec(nodeSpec, node).inputs);
+        return nodeSpec;
+    }
+
 
     executeAncestors(node,inputObject,args)
     {

@@ -5,13 +5,13 @@ import {TransformConfig} from './TransformConfig'
 export class TransformNode
 {
     ancestors = [];
-    filter = null;
+    pipe = null;
     name = 'unnamed TransformNode';
 
     constructor(name,filter)
     {
         this.name = name;
-        this.filter = filter;
+        this.pipe = filter;
     }
 
     addInput(ancestor)
@@ -20,8 +20,14 @@ export class TransformNode
     }
 
     execute(inputObject,args) {
-        if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.filter.name);
+        if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.pipe.name);
 
-        return this.filter.execute.apply(this.filter,[inputObject].concat(args));
+        return this.pipe.execute.apply(this.pipe,[inputObject].concat(args));
+    }
+
+    buildInputSpec(parentSpec)
+    {
+        if(TransformConfig.enableDebugMessages) console.log('Building InputSpec for Node of ' + this.pipe.name);
+        return this.pipe.buildInputSpec(parentSpec);
     }
 }

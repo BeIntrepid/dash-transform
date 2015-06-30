@@ -99,13 +99,19 @@ System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
 
                     this.busy = true;
                     var streamPromise = new Promise(function (res, rej) {
-                        _this.pipe.execute(args == null ? _this.input : args).then(_this.onPipeExecuted.bind(_this)).then(function (i) {
+                        var executePromise = _this.pipe.execute(args == null ? _this.input : args);
+                        executePromise.then(_this.onPipeExecuted.bind(_this));
+                        executePromise.then(function (i) {
                             _this.busy = false;
                             res(i);
                         });
                     });
 
                     return streamPromise;
+                };
+
+                Stream.prototype.buildInputSpec = function buildInputSpec() {
+                    return this.pipe.buildInputSpec();
                 };
 
                 return Stream;

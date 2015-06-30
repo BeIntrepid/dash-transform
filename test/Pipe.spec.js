@@ -5,12 +5,12 @@ class TestConfig
     static dontExecute = true;
 }
 
-describe('a first test suite', () => {
+var ignore = {describe : ()=>{}};
+
+ignore.describe('a first test suite', () => {
 
     describe('Simple Pipe', () => {
         it("should run and pass", () => {
-
-            if(TestConfig.dontExecute) return;
 
             var filterLib = new transform.TransformLibrary();
             new Util.registerFilters(filterLib);
@@ -26,9 +26,6 @@ describe('a first test suite', () => {
 
     describe('Simple Pipe', () => {
         it("should run and pass", () => {
-
-            if(TestConfig.dontExecute) return;
-
             var filterLib = new transform.TransformLibrary();
             var pr = filterLib.getFilterWrapped('GetDataArray');
             var pipeline = new transform.Pipe('Simple Pipe',pr);
@@ -41,8 +38,6 @@ describe('a first test suite', () => {
 
     describe('Test pipe.add', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
-
             var pipeline = new transform.Pipe('Simple Pipe');
 
             pipeline.add(()=>{return 5;})
@@ -59,8 +54,6 @@ describe('a first test suite', () => {
 
     describe('chained filters', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
-
             var filterLib = new transform.TransformLibrary();
 
             var pr = filterLib.getFilterWrapped('MultiplyArray');
@@ -75,8 +68,6 @@ describe('a first test suite', () => {
 
     describe('chained filters', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
-
             var filterLib = new transform.TransformLibrary();
 
             var pr = filterLib.getFilterWrapped('GetDataArray');
@@ -96,7 +87,6 @@ describe('a first test suite', () => {
 
     describe('pipe inside pipe', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
 
             var filterLib = new transform.TransformLibrary();
 
@@ -114,7 +104,6 @@ describe('a first test suite', () => {
 
     describe('Input pipe', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
 
             var filterLib = new transform.TransformLibrary();
 
@@ -138,7 +127,6 @@ describe('a first test suite', () => {
 
     describe('2 filter input dependencies', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
 
             var filterLib = new transform.TransformLibrary();
 
@@ -155,7 +143,6 @@ describe('a first test suite', () => {
 
     describe('2 pipe input dependencies', () => {
         it("should run and pass", () => {
-            if(TestConfig.dontExecute) return;
 
             var filterLib = new transform.TransformLibrary();
 
@@ -179,7 +166,6 @@ describe('a first test suite', () => {
 
     describe('Building Stream', () => {
         it("should run and pass", () => {
-            //if(TestConfig.dontExecute) return;
 
             var pipeline = new transform.Pipe('Simple Pipe');
 
@@ -195,6 +181,63 @@ describe('a first test suite', () => {
             });
 
             stream.start({interval : 1000});
+        });
+    });
+});
+
+describe('inputOverride', () => {
+
+    describe('Testing input aggregation', () => {
+        it("should run and pass", () => {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var inputSpec = [{name:"i"}];
+            var filterLib = new transform.TransformLibrary();
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i)=>{
+                return [1,2,3,4];
+            },inputSpec));
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParentParent',(input,i)=>{
+                return [1,2,3,4];
+            },inputSpec));
+
+            var pr = filterLib.getFilterWrapped('SwitchableInput');
+            var pipe = new transform.Pipe('MySwitchableInputPipe', pr);
+
+            var secondParent = filterLib.getFilterWrapped('SwitchableInputParent');
+            secondParent.addInput(filterLib.getFilterWrapped('SwitchableInputParentParent'));
+
+            pr.addInput(secondParent);
+            pr.addInput(filterLib.getFilterWrapped('SwitchableInputParent'));
+
+            var ds = new transform.Stream(pipe);
+
+            var spec = ds.buildInputSpec();
+
+            console.dir(JSON.parse(JSON.stringify(spec)));
+        });
+    });
+
+    ignore.describe('Testing input overrides', () => {
+        it("should run and pass", () => {
+
+            var inputSpec = [{name:"i"}];
+            var filterLib = new transform.TransformLibrary();
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                return [1,2,3,4];
+            },inputSpec));
+
+            var ds = new transform.Stream(pipeline);
+
+            ds.execute().then((o)=> {
+                console.log(Util.equals([1, 2, 3, 4], o));
+            });
+
         });
     });
 });

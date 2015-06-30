@@ -19,11 +19,11 @@ System.register(['./TransformLibrary', './Filters', './TransformConfig'], functi
                     _classCallCheck(this, TransformNode);
 
                     this.ancestors = [];
-                    this.filter = null;
+                    this.pipe = null;
                     this.name = 'unnamed TransformNode';
 
                     this.name = name;
-                    this.filter = filter;
+                    this.pipe = filter;
                 }
 
                 TransformNode.prototype.addInput = function addInput(ancestor) {
@@ -31,9 +31,13 @@ System.register(['./TransformLibrary', './Filters', './TransformConfig'], functi
                 };
 
                 TransformNode.prototype.execute = function execute(inputObject, args) {
-                    if (TransformConfig.enableDebugMessages) console.log('Executing node ' + this.filter.name);
+                    if (TransformConfig.enableDebugMessages) console.log('Executing node ' + this.pipe.name);
 
-                    return this.filter.execute.apply(this.filter, [inputObject].concat(args));
+                    return this.pipe.execute.apply(this.pipe, [inputObject].concat(args));
+                };
+
+                TransformNode.prototype.buildInputSpec = function buildInputSpec() {
+                    return this.pipe.buildInputSpec();
                 };
 
                 return TransformNode;

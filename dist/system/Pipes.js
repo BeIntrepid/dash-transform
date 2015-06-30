@@ -57,15 +57,35 @@ System.register(['./TransformLibrary', './Filters', './Nodes', './TransformConfi
                     return this.executeNode(this.rootNode, inputObject, args);
                 };
 
-                Pipe.prototype.executeAncestors = function executeAncestors(node, inputObject, args) {
+                Pipe.prototype.traverseAncestors = function traverseAncestors(node, f) {
                     var _this = this;
+
+                    var executeMethodResults = [];
+
+                    if (node.ancestors != null) {
+                        node.ancestors.forEach(function (a) {
+                            _this.traverseAncestors(node, a);
+                        });
+
+                        f(node);
+                    }
+                };
+
+                Pipe.prototype.buildInputSpec = function buildInputSpec() {
+                    this.traverseAncestors(this.rootNode, function (node) {
+                        console.log(node.pipe.name);
+                    });
+                };
+
+                Pipe.prototype.executeAncestors = function executeAncestors(node, inputObject, args) {
+                    var _this2 = this;
 
                     var executeMethodResults = [];
 
                     if (node.ancestors != null) {
 
                         node.ancestors.forEach(function (a) {
-                            var ancestorPromise = _this.executeNode(a, inputObject, args);
+                            var ancestorPromise = _this2.executeNode(a, inputObject, args);
                             executeMethodResults.push(ancestorPromise);
                         });
                     }
@@ -82,17 +102,17 @@ System.register(['./TransformLibrary', './Filters', './Nodes', './TransformConfi
                 };
 
                 Pipe.prototype.executeNode = function executeNode(node, inputObject, args) {
-                    var _this2 = this;
+                    var _this3 = this;
 
                     var executePromise = new Promise(function (res, rej) {
-                        var inputPromise = _this2.executeAncestors(node, inputObject, args);
+                        var inputPromise = _this3.executeAncestors(node, inputObject, args);
 
                         inputPromise.then(function (inputs) {
                             if (inputs.length == 0 && args != null) {
                                 inputs.push(args);
                             }
 
-                            var extractedInputs = _this2.extractInputs(inputs);
+                            var extractedInputs = _this3.extractInputs(inputs);
                             var inputForFunction = [inputObject].concat(extractedInputs);
 
                             var nodeExecutionResult = node instanceof Pipe ? node.execute.apply(node, inputForFunction) : nodeExecutionResult = node.execute(inputObject, extractedInputs);

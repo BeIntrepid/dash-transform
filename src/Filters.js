@@ -1,30 +1,35 @@
-//import * as Enumerable from 'linq-es6'
+import {InputSpec} from './InputSpec'
+import {TransformConfig} from './TransformConfig'
 
 export class Filter
 {
     inputObject = null;
 
-    constructor(name)
+    inputSpec = [];
+
+    constructor(name,inputSpec)
     {
         this.name = name;
-    }
-
-    addInputFilter(Filter)
-    {
-        this.ancestors.push(Filter);
+        this.inputSpec = inputSpec;
     }
 
     execute(inputObject,args)
     {
         return Promise.resolve(true);
     }
+
+    buildInputSpec() {
+        if(TransformConfig.enableDebugMessages) console.log('Building InputSpec for ' + this.name);
+
+        return new InputSpec(this.name,this.inputSpec,null);
+    }
 }
 
 export class FunctionFilter extends Filter
 {
-    constructor(name,toExecute)
+    constructor(name,toExecute,inputSpec)
     {
-        super(name);
+        super(name,inputSpec);
         this.toExecute = toExecute;
     }
 
