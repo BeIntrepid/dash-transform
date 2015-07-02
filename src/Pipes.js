@@ -53,7 +53,7 @@ export class Pipe
 
     execute(inputObject,args)
     {
-        if(TransformConfig.enableDebugMessages) console.log('Executing ' + this.name);
+        if(TransformConfig.enableDebugMessages) console.log('Executing pipe ' + this.name);
         return this.executeNode(this.rootNode,inputObject,args);
     }
 
@@ -67,6 +67,13 @@ export class Pipe
 
             f(node);
         }
+    }
+
+    flattenPipeSpec(spec)
+    {
+//        spec.inputs.forEach(()=>{})
+
+        return spec;
     }
 
     buildInputSpec(parentSpec,node)
@@ -84,7 +91,15 @@ export class Pipe
                 nodeSpec.ancestors.push(this.buildInputSpec(nodeSpec, a));
             });
 
-            nodeSpec.inputs.push(node.buildInputSpec(nodeSpec, node).inputs);
+            var inputSpec = node.buildInputSpec(nodeSpec, node);
+
+            inputSpec.inputs.forEach((inSpec)=>{
+                nodeSpec.inputs.push(inSpec);
+            });
+
+        //nodeSpec.inputs.push(node.buildInputSpec(nodeSpec, node).inputs);
+
+
         return nodeSpec;
     }
 

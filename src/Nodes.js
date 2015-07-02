@@ -20,7 +20,7 @@ export class TransformNode
     }
 
     execute(inputObject,args) {
-        if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.pipe.name);
+        //if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.pipe.name);
 
         return this.pipe.execute.apply(this.pipe,[inputObject].concat(args));
     }

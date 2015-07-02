@@ -22,6 +22,13 @@ export class TransformLibrary
         return new TransformNode('',Enumerable(TransformLibrary.filters).where((f)=>{ return f.name == filterName}).single());
     }
 
+    clearAll()
+    {
+        TransformLibrary.filters = [];
+        TransformLibrary.pipes = [];
+    }
+
+
     registerPipe(pipe)
     {
         TransformLibrary.pipes.push(pipe);

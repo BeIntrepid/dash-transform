@@ -187,7 +187,167 @@ ignore.describe('a first test suite', () => {
 
 describe('inputOverride', () => {
 
-    describe('Testing input aggregation', () => {
+
+    ignore.describe('A single pipe with input spec should give a single value', () => {
+        it("should run and pass", () => {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var filterLib = new transform.TransformLibrary();
+            filterLib.clearAll();
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+
+            var pr = filterLib.getFilterWrapped('SwitchableInput');
+            var pipe = new transform.Pipe('MySwitchableInputPipe', pr);
+
+
+            var ds = new transform.Stream(pipe);
+
+            var spec = ds.buildInputSpec();
+            expect(spec.SwitchableInput_MyValue).toBe(0);
+            console.dir(JSON.parse(JSON.stringify(spec)));
+        });
+    });
+
+    ignore.describe('A pipe with an input step should give correct values', () => {
+        it("should run and pass", () => {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var filterLib = new transform.TransformLibrary();
+            filterLib.clearAll();
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+            var parentInputSpec = [{name:"i"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i)=>{
+                return [1,2,3,4];
+            },parentInputSpec));
+
+            var switchableInputNode = filterLib.getFilterWrapped('SwitchableInput');
+            var switchableInputParentNode = filterLib.getFilterWrapped('SwitchableInputParent');
+
+            switchableInputNode.addInput(switchableInputParentNode);
+            var pipe = new transform.Pipe('MySwitchableInputPipe', switchableInputNode);
+            var ds = new transform.Stream(pipe);
+
+            var spec = ds.buildInputSpec();
+            expect(spec.SwitchableInput_MyValue).toBe(0);
+            expect(spec.SwitchableInput_SwitchableInputParent_i).toBe(0);
+            console.dir(JSON.parse(JSON.stringify(spec)));
+        });
+    });
+
+    ignore.describe('A pipe with more than one step inside returns correct values', () => {
+        it("should run and pass", () => {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var filterLib = new transform.TransformLibrary();
+            filterLib.clearAll();
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+            var parentInputSpec = [{name:"i"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i)=>{
+                return [1,2,3,4];
+            },parentInputSpec));
+
+            var parentParentInputSpec = [{name:"i"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParentParent',(input,i)=>{
+                return [1,2,3,4];
+            },parentParentInputSpec));
+
+            var switchableInputNode = filterLib.getFilterWrapped('SwitchableInput');
+            var switchableInputParentNode = filterLib.getFilterWrapped('SwitchableInputParent');
+            var switchableInputParentParentNode = filterLib.getFilterWrapped('SwitchableInputParentParent');
+
+            var pipe = new transform.Pipe('MySwitchableInputPipe', switchableInputParentParentNode);
+            pipe.add(switchableInputParentNode);
+            pipe.add(switchableInputNode);
+
+            var ds = new transform.Stream(pipe);
+
+            var spec = ds.buildInputSpec();
+            expect(spec.SwitchableInput_MyValue).toBe(0);
+            expect(spec.SwitchableInput_SwitchableInputParent_i).toBe(0);
+            console.dir(JSON.parse(JSON.stringify(spec)));
+        });
+    });
+
+    describe('A pipe containing a pipe returns correct values', () => {
+        it("should run and pass",function (done) {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var filterLib = new transform.TransformLibrary();
+            filterLib.clearAll();
+
+            // Build Filters
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                console.log('Filter running ' + 'SwitchableInput');
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+            var parentInputSpec = [{name:"i"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i)=>{
+                console.log('Filter running ' + 'SwitchableInputParent');
+                return [1,2,3,4];
+            },parentInputSpec));
+
+            var parentParentInputSpec = [{name:"i"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputInternalParent',(input,i)=>{
+                console.log('Filter running ' + 'SwitchableInputInternalParent');
+                return [1,2,3,4];
+            },parentParentInputSpec));
+
+            var switchableInputNode = filterLib.getFilterWrapped('SwitchableInput');
+            var switchableInputParentNode = filterLib.getFilterWrapped('SwitchableInputParent');
+            var switchableInputInternalParent = filterLib.getFilterWrapped('SwitchableInputInternalParent');
+
+            // Register Pipes
+            var pipe = new transform.Pipe('FirstPipe');
+            pipe.add(switchableInputInternalParent );
+            pipe.add(switchableInputNode);
+
+            var pipeNode = new transform.TransformNode('asdf',pipe);
+            pipeNode.addInput(switchableInputParentNode);
+
+            var ds = new transform.Stream(pipeNode );
+
+            var spec = ds.buildInputSpec();
+
+            //expect(spec.SwitchableInput_MyValue).toBe(0);
+            //expect(spec.SwitchableInput_SwitchableInputParent_i).toBe(0);
+            //console.dir(JSON.parse(JSON.stringify(spec)));
+            var executePromise = ds.execute();
+
+            executePromise.then(()=>{
+
+                done();
+            });
+
+
+        });
+    });
+
+    ignore.describe('Testing input aggregation', () => {
+        it("should run and pass", () => {
+            var pipeInputSpec = JSON.parse('{"name":"SwitchableInputPipe","inputs":[[[{"name":"MyValue"}]]],"ancestors":[{"name":"SwitchableInputParentPipe","inputs":[[[{"name":"i"}]]],"ancestors":[]}]}');
+            var pipe = new transform.Pipe('SwitchableInputPipe', null);
+
+            var spec = pipe.flattenPipeSpec(pipeInputSpec);
+            console.dir(JSON.parse(JSON.stringify(spec)));
+        });
+    });
+
+
+    ignore.describe('Testing input aggregation', () => {
         it("should run and pass", () => {
 
             var switchableInputInputSpec = [{name:"MyValue"}];
@@ -213,6 +373,46 @@ describe('inputOverride', () => {
 
             pr.addInput(secondParent);
             pr.addInput(filterLib.getFilterWrapped('SwitchableInputParent'));
+
+            var ds = new transform.Stream(pipe);
+
+            var spec = ds.buildInputSpec();
+
+            console.dir(JSON.parse(JSON.stringify(spec)));
+        });
+    });
+
+
+    ignore.describe('Testing input aggregation', () => {
+        it("should run and pass", () => {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var inputSpec = [{name:"i"}];
+            var filterLib = new transform.TransformLibrary();
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i)=>{
+                return [1,2,3,4];
+            },inputSpec));
+
+            //filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParentParent',(input,i)=>{
+            //    return [1,2,3,4];
+            //},inputSpec));
+
+            var pr = filterLib.getFilterWrapped('SwitchableInput');
+            pr.addInput(filterLib.getFilterWrapped('SwitchableInputParent'));
+
+            var pipe = new transform.Pipe('MySwitchableInputPipe', pr);
+
+
+            //var secondParent = filterLib.getFilterWrapped('SwitchableInputParent');
+            //secondParent.addInput(filterLib.getFilterWrapped('SwitchableInputParentParent'));
+
+            //pr.addInput(secondParent);
+            //pr.addInput(filterLib.getFilterWrapped('SwitchableInputParent'));
 
             var ds = new transform.Stream(pipe);
 

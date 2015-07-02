@@ -15,16 +15,15 @@ export class Stream
 
     constructor(pipe)
     {
-        // Make sure we're not referencing the pipe directly
-        let wrappedPipe;
+        // Make sure we're referencing the pipe directly
+        let wrappedPipe = pipe;
         if(pipe instanceof TransformNode)
         {
-            wrappedPipe = pipe
+            wrappedPipe = new Pipe('StreamGeneratedPipe',pipe)
         }
-        else if(pipe instanceof filters.Filter ||
-                pipe instanceof Pipe)
+        else if(pipe instanceof filters.Filter)
         {
-            wrappedPipe = new TransformNode('',pipe);
+            wrappedPipe = new Pipe('StreamGeneratedPipe',new TransformNode('StreamGeneratedTransformNode',pipe))
         }
 
         this.pipe = wrappedPipe;
@@ -136,16 +135,14 @@ export class Stream
         });
 
         inputNode.inputs.forEach((inputObj)=>{
-            inputObj.forEach((iObj)=>{
-                this.resolveInputName(flattenedInputs,currentScopeName ,iObj);
-            });
+                this.resolveInputName(flattenedInputs,currentScopeName ,inputObj);
         })
 
     }
 
     buildInputName(scopeName,inputName)
     {
-        return (scopeName.length > 0 ? scopeName + '.' : '') + inputName;
+        return (scopeName.length > 0 ? scopeName + '_' : '') + inputName;
     }
 
     resolveInputName(flattenedInputs,scopeName,currentObj)
