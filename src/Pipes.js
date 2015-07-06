@@ -106,6 +106,8 @@ export class Pipe
 
     executeAncestors(node,inputObject,args)
     {
+        if(TransformConfig.enableDebugMessages) console.log('Executing ancestors for ' + this.name);
+
         var executeMethodResults = [];
 
         if(node.ancestors != null) {
@@ -115,6 +117,9 @@ export class Pipe
                 executeMethodResults.push(ancestorPromise);
             });
         }
+
+        if(TransformConfig.enableDebugMessages) console.log('Finished ancestors for ' + this.name);
+
         return Promise.all(executeMethodResults);
     }
 

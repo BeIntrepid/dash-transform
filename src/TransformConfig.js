@@ -1,4 +1,4 @@
 export class TransformConfig
 {
-    static enableDebugMessages = true;
+    static enableDebugMessages = false;
 }

@@ -294,7 +294,7 @@ describe('inputOverride', () => {
                 return [1,2,3,4];
             },switchableInputInputSpec));
 
-            var parentInputSpec = [{name:"i"}];
+            var parentInputSpec = [{name:"SwitchableInputParentVALUE"}];
             filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i)=>{
                 console.log('Filter running ' + 'SwitchableInputParent');
                 return [1,2,3,4];
@@ -314,6 +314,7 @@ describe('inputOverride', () => {
             var pipe = new transform.Pipe('FirstPipe');
             pipe.add(switchableInputInternalParent );
             pipe.add(switchableInputNode);
+            pipe.rootNode.addInput(switchableInputInternalParent );
 
             var pipeNode = new transform.TransformNode('asdf',pipe);
             pipeNode.addInput(switchableInputParentNode);

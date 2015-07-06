@@ -7,6 +7,11 @@ export class Filter
 
     inputSpec = [];
 
+    getInputSpec()
+    {
+        return this.inputSpec;
+    }
+
     constructor(name,inputSpec)
     {
         this.name = name;
@@ -23,6 +28,8 @@ export class Filter
 
         return new InputSpec(this.name,this.inputSpec,null);
     }
+
+
 }
 
 export class FunctionFilter extends Filter
