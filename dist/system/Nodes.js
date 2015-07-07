@@ -166,7 +166,7 @@ System.register(['./TransformLibrary', './Filters', './TransformConfig', './Pipe
                                     value = inputOverride.value;
                                 }
 
-                                args[i] = inputOverride.value;
+                                args[i] = value;
                             }
                         }
                     }

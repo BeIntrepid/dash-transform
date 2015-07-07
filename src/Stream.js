@@ -3,12 +3,52 @@ import {Pipe} from './Pipes'
 import {TransformNode} from './Nodes'
 import {InputResolver} from './InputResolver'
 
+export class StreamModel
+{
+    mappings = {};
+    bindedInputChanged = this.inputChanged.bind(this);
+
+
+    constructor(mappedInputs)
+    {
+        this.mappedInputs = mappedInputs;
+        this.setObservable(this);
+    }
+
+    addMapping(niceName,inputToMap)
+    {
+        this.mappings[niceName] = inputToMap;
+        this[niceName] = inputToMap.value;
+    }
+
+    setObservable(obs)
+    {
+        Object.observe(obs,this.bindedInputChanged);
+    }
+
+    inputChanged(changes)
+    {
+        changes.forEach((change)=>{
+            if(change.type == 'update') {
+                this.mappings[change.name].value = this[change.name];
+            }
+        });
+
+        if(this.status != 'started')
+        {
+            return;
+        }
+    }
+}
+
 export class Stream
 {
     busy = false;
     pipe = null;
     mappedInputs = null;
+
     triggers = {};
+
     output = {};
     status = 'stopped';
     subscriptions = [];
@@ -104,7 +144,9 @@ export class Stream
     {
         this.cloneTree();
         this.makeNodeNamesUnique();
-        this.getMapInputs();
+        var inputs = this.getMapInputs();
+        this.streamModel = new StreamModel(inputs);
+
         this.hasBeenBuilt = true;
     }
 

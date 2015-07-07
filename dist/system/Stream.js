@@ -1,7 +1,7 @@
 System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function (_export) {
     'use strict';
 
-    var filters, Pipe, TransformNode, InputResolver, Stream;
+    var filters, Pipe, TransformNode, InputResolver, StreamModel, Stream;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -16,6 +16,45 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
             InputResolver = _InputResolver.InputResolver;
         }],
         execute: function () {
+            StreamModel = (function () {
+                function StreamModel(mappedInputs) {
+                    _classCallCheck(this, StreamModel);
+
+                    this.mappings = {};
+                    this.bindedInputChanged = this.inputChanged.bind(this);
+
+                    this.mappedInputs = mappedInputs;
+                    this.setObservable(this);
+                }
+
+                StreamModel.prototype.addMapping = function addMapping(niceName, inputToMap) {
+                    this.mappings[niceName] = inputToMap;
+                    this[niceName] = inputToMap.value;
+                };
+
+                StreamModel.prototype.setObservable = function setObservable(obs) {
+                    Object.observe(obs, this.bindedInputChanged);
+                };
+
+                StreamModel.prototype.inputChanged = function inputChanged(changes) {
+                    var _this = this;
+
+                    changes.forEach(function (change) {
+                        if (change.type == 'update') {
+                            _this.mappings[change.name].value = _this[change.name];
+                        }
+                    });
+
+                    if (this.status != 'started') {
+                        return;
+                    }
+                };
+
+                return StreamModel;
+            })();
+
+            _export('StreamModel', StreamModel);
+
             Stream = (function () {
                 function Stream(pipe) {
                     _classCallCheck(this, Stream);
@@ -101,7 +140,9 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
                 Stream.prototype.build = function build() {
                     this.cloneTree();
                     this.makeNodeNamesUnique();
-                    this.getMapInputs();
+                    var inputs = this.getMapInputs();
+                    this.streamModel = new StreamModel(inputs);
+
                     this.hasBeenBuilt = true;
                 };
 
@@ -123,7 +164,7 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
                 };
 
                 Stream.prototype.execute = function execute(args) {
-                    var _this = this;
+                    var _this2 = this;
 
                     if (!this.hasBeenBuilt) {
                         throw 'Stream hasn\'t been built before executing';
@@ -134,13 +175,13 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
 
                         var inputObject = args == null ? {} : args;
 
-                        inputObject.__inputResolver = new InputResolver(_this.mappedInputs);
+                        inputObject.__inputResolver = new InputResolver(_this2.mappedInputs);
 
-                        var executePromise = _this.pipe.execute(inputObject);
+                        var executePromise = _this2.pipe.execute(inputObject);
 
-                        executePromise.then(_this.onPipeExecuted.bind(_this));
+                        executePromise.then(_this2.onPipeExecuted.bind(_this2));
                         executePromise.then(function (i) {
-                            _this.busy = false;
+                            _this2.busy = false;
                             res(i);
                         });
                     });

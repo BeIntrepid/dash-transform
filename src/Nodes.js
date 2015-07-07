@@ -164,7 +164,7 @@ export class TransformNode
                         value = inputOverride.value;
                     }
 
-                    args[i] = inputOverride.value;
+                    args[i] = value;
                 }
             }
         }
