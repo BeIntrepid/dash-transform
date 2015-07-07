@@ -17,15 +17,25 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
         }],
         execute: function () {
             StreamModel = (function () {
-                function StreamModel(mappedInputs) {
+                function StreamModel(stream, mappedInputs) {
                     _classCallCheck(this, StreamModel);
 
+                    this.stream = null;
                     this.mappings = {};
                     this.bindedInputChanged = this.inputChanged.bind(this);
 
                     this.mappedInputs = mappedInputs;
-                    this.setObservable(this);
+                    this.stream = stream;
+                    this.start();
                 }
+
+                StreamModel.prototype.start = function start() {
+                    this.setObservable(this);
+                };
+
+                StreamModel.prototype.stop = function stop() {
+                    Object.unobserve(this, this.bindedInputChanged);
+                };
 
                 StreamModel.prototype.addMapping = function addMapping(niceName, inputToMap) {
                     this.mappings[niceName] = inputToMap;
@@ -45,9 +55,11 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
                         }
                     });
 
-                    if (this.status != 'started') {
+                    if (this.stream.status != 'started') {
                         return;
                     }
+
+                    this.stream.execute();
                 };
 
                 return StreamModel;
@@ -69,6 +81,7 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
                     this.bindedInputChanged = this.inputChanged.bind(this);
                     this.subscriptionTimeout = null;
                     this.hasBeenBuilt = false;
+                    this.streamModel = null;
 
                     var wrappedPipe = pipe;
                     if (pipe instanceof TransformNode) {
@@ -141,7 +154,7 @@ System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function
                     this.cloneTree();
                     this.makeNodeNamesUnique();
                     var inputs = this.getMapInputs();
-                    this.streamModel = new StreamModel(inputs);
+                    this.streamModel = new StreamModel(this, inputs);
 
                     this.hasBeenBuilt = true;
                 };

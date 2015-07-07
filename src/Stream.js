@@ -5,14 +5,27 @@ import {InputResolver} from './InputResolver'
 
 export class StreamModel
 {
+    stream = null;
     mappings = {};
     bindedInputChanged = this.inputChanged.bind(this);
 
 
-    constructor(mappedInputs)
+    constructor(stream,mappedInputs)
     {
         this.mappedInputs = mappedInputs;
+        this.stream = stream;
+        this.start();
+    }
+
+    start()
+    {
         this.setObservable(this);
+    }
+
+    stop()
+    {
+        Object.unobserve(this,this.bindedInputChanged)
+
     }
 
     addMapping(niceName,inputToMap)
@@ -34,10 +47,12 @@ export class StreamModel
             }
         });
 
-        if(this.status != 'started')
+        if(this.stream.status != 'started')
         {
             return;
         }
+
+        this.stream.execute();
     }
 }
 
@@ -55,6 +70,7 @@ export class Stream
     bindedInputChanged = this.inputChanged.bind(this);
     subscriptionTimeout = null;
     hasBeenBuilt = false;
+    streamModel = null;
 
     constructor(pipe)
     {
@@ -145,7 +161,7 @@ export class Stream
         this.cloneTree();
         this.makeNodeNamesUnique();
         var inputs = this.getMapInputs();
-        this.streamModel = new StreamModel(inputs);
+        this.streamModel = new StreamModel(this,inputs);
 
         this.hasBeenBuilt = true;
     }
