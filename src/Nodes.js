@@ -23,6 +23,11 @@ export class TransformNode
         this.ancestors.push(ancestor);
     }
 
+    getNodeName()
+    {
+        return this.name;
+    }
+
     getName()
     {
         return this.pipe.name;
@@ -40,12 +45,22 @@ export class TransformNode
             {
                 let nodeInputSpec = n.pipe.getInputSpec(scope,inputMapping);
                 nodeInputSpec.forEach((nodeInput)=>{
-                    this.resolveInputName(inputMapping,this.buildInputName(scope,n.getName()),nodeInput);
+
+                    if(inputMapping[this.buildInputName(scope,n.getNodeName())] == null)
+                    {
+                        inputMapping[this.buildInputName(scope,n.getNodeName())] = { inputSpec : nodeInputSpec,
+                                                                                     nodeRef : n,
+                                                                                     inputs : [],
+                                                                                     forInput : function (name) { return Enumerable(this.inputs).single((i)=>{ return i.name == name; })}
+                        };
+                    }
+
+                    inputMapping[this.buildInputName(scope,n.getNodeName())].inputs.push({name: nodeInput.name, value : null});
                 });
             }
             else if(n.pipe instanceof Pipe)
             {
-                n.pipe.rootNode.mapInputs(this.buildInputName(scope,n.getName()),inputMapping);
+                n.pipe.rootNode.mapInputs(this.buildInputName(scope,n.getNodeName()),inputMapping);
             }
         });
     }
@@ -55,42 +70,14 @@ export class TransformNode
         return (scopeName.length > 0 ? scopeName + '_' : '') + inputName;
     }
 
-    resolveInputName(flattenedInputs,scopeName,currentObj)
-    {
-        var name = this.buildInputName(scopeName,currentObj.name);
 
-        var valueName = null;
-        var resolvedScopeName = null;
-        if(flattenedInputs[name] != null)
-        {
-            var resolvedScopeName = this.incrementScopeName(flattenedInputs,scopeName,currentObj.name);
-            valueName = this.buildInputName(resolvedScopeName,currentObj.name);
-        }
-        else
-        {
-            valueName = name;
-            resolvedScopeName = scopeName;
-        }
-
-        flattenedInputs[valueName] = {value : null, name : currentObj.name};
-
-        if(flattenedInputs.__scopeList == null)
-        {
-            flattenedInputs.__scopeList = {};
-        }
-
-        flattenedInputs.__scopeList[resolvedScopeName] = false;
-
-    }
-
-    incrementScopeName(flattenedInputs,scopeName,inputName)
+    incrementNodeName(currentNames,nodeName)
     {
         var i = 1;
         while(true)
         {
-            var incrementedScopeName = scopeName + i;
-            var testName = this.buildInputName(incrementedScopeName,inputName);
-            if(!flattenedInputs[testName])
+            var incrementedScopeName = nodeName + i;
+            if(currentNames[incrementedScopeName] == null)
             {
                 return incrementedScopeName;
             }
@@ -101,83 +88,74 @@ export class TransformNode
 
     addSelfAndAncestorsToArray(ancestorArray,node)
     {
+        ancestorArray.push(node);
+
         node.ancestors.forEach((n)=>{
             this.addSelfAndAncestorsToArray(ancestorArray,n);
         });
+    }
 
-        ancestorArray.push(node);
+    cloneTree()
+    {
+
+        var newName = this.name == '' ? this.pipe.name : this.name;
+
+        var newNode = new TransformNode( newName,this.pipe);
+
+        if(this.pipe instanceof Pipe)
+        {
+            this.pipe.rootNode = this.pipe.rootNode.cloneTree();
+        }
+
+        this.ancestors.forEach((n)=>{
+            newNode.addInput(n.cloneTree());
+        });
+
+        return newNode;
+    }
+
+    makeNodeNamesUnique()
+    {
+        var allTopLevelNodes = [];
+        var currentLevelNodeNames = {};
+        this.addSelfAndAncestorsToArray(allTopLevelNodes,this);
+
+        allTopLevelNodes.forEach((n)=>{
+
+            let nodeName = n.getNodeName();
+            if(currentLevelNodeNames[nodeName] != null)
+            {
+                nodeName = this.incrementNodeName(currentLevelNodeNames,nodeName);
+                n.name = nodeName;
+            }
+
+            currentLevelNodeNames[nodeName] = 1;
+
+
+            if(n.pipe instanceof Pipe)
+            {
+                n.pipe.rootNode.makeNodeNamesUnique();
+            }
+        });
     }
 
     execute(inputObject,args) {
         //if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.pipe.name);
 
-            // Currently not checking for collisions
-            var currentScope = this.buildInputName(inputObject.__executionScope.currentScope,this.pipe.getName());
-            var scopeBeforeExecuting = inputObject.__executionScope.currentScope;
+        var inputOverrides = inputObject.__inputResolver.getInputOverrides(this);
 
-           if(inputObject.__executionScope.inputOverrides.__scopeList[currentScope] === false)
-           {
-               inputObject.__executionScope.inputOverrides.__scopeList[currentScope] = true;
-           }
-           else if(inputObject.__executionScope.inputOverrides.__scopeList[currentScope] == null)
-           {
-           }
-            else
-           {
+        if(inputOverrides != null) {
+            for (var i = 0; i < inputOverrides.inputs.length; i++) {
 
-               //console.log('SCOPE NEEDS CHANGING');
-
-               var i = 1;
-               while(true)
-               {
-                   var incrementedScopeName = currentScope + i;
-                   if(inputObject.__executionScope.inputOverrides.__scopeList[incrementedScopeName] === false)
-                   {
-                       currentScope = incrementedScopeName;
-                       inputObject.__executionScope.inputOverrides.__scopeList[incrementedScopeName] = true;
-                       //console.log('SCOPE CHANGED TO ' + incrementedScopeName);
-
-
-                       break;
-                   }
-
-                   i = i + 1;
-               }
-           }
-
-        if(this.pipe instanceof Pipe)
-        {
-            inputObject.__executionScope.currentScope = currentScope;
+                var inputOverride = inputOverrides.inputs[i];
+                if(inputOverride.value != null)
+                {
+                    args[i] = inputOverride.value;
+                }
+            }
         }
 
-        // Currently only supporting overriding at the filter level
-        if(this.pipe instanceof Filter) {
-
-
-            var inputs = this.pipe.getInputSpec();
-
-
-            var that = this;
-            inputs.forEach((input)=>{
-
-                var scopedName = this.buildInputName(currentScope, input.name);
-                var override = inputObject.__executionScope.inputOverrides[scopedName];
-                if(override.value !== null)
-                {
-                    console.log('Found an override for input value ' + input.name + ' on ' + this.getName() + ' which is using the scope name ' + scopedName + ', value:' + override.value);
-                }
-                else
-                {
-                    console.log('No override for input value ' + input.name + ' on ' + this.getName() + ' which is using the scope name ' + scopedName);
-
-                }
-            });
-
-          //  var inputOverridesForCurrentNode = inputObject.__executionScope.inputOverrides[inputObject.__executionScope.currentScope];
-          //  return this.pipe.execute.apply(this.pipe,[inputObject].concat(args));
-        }
-
-
-        return this.pipe.execute.apply(this.pipe,[inputObject].concat(args));
+        var inputArgs = [inputObject].concat(args);
+        return this.pipe.execute.apply(this.pipe,inputArgs);
     }
 }

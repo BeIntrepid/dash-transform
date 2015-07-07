@@ -1,11 +1,13 @@
 import * as filters from './Filters'
 import {Pipe} from './Pipes'
 import {TransformNode} from './Nodes'
+import {InputResolver} from './InputResolver'
 
 export class Stream
 {
     busy = false;
     pipe = null;
+    mappedInputs = null;
     input = {};
     output = {};
     status = 'stopped';
@@ -97,15 +99,42 @@ export class Stream
         this.subscriptions.push(subscription);
     }
 
+    build()
+    {
+        this.cloneTree();
+        this.makeNodeNamesUnique();
+        this.getMapInputs();
+
+    }
+
+    getMapInputs()
+    {
+        if(this.mappedInputs == null) {
+            var spec = {};
+            this.pipe.rootNode.mapInputs('', spec);
+            this.mappedInputs = spec;
+        }
+        return this.mappedInputs;
+    }
+
+    cloneTree()
+    {
+        this.pipe.rootNode = this.pipe.rootNode.cloneTree();
+    }
+
+    makeNodeNamesUnique()
+    {
+        this.pipe.rootNode.makeNodeNamesUnique();
+    }
+
     execute(args)
     {
         this.busy = true;
         var streamPromise = new Promise((res,rej)=>{
 
             var inputObject = args == null ? this.input : args;
-            inputObject.__executionScope = { currentScope : ''};
-            inputObject.__executionScope.inputOverrides = this.buildInputSpec();
-            inputObject.__executionScope.inputOverrides['FirstPipe_SwitchableInputInternalParent1_i'].value = 'ohMyGod';
+
+            inputObject.__inputResolver = new InputResolver(this.mappedInputs);
 
             var executePromise = this.pipe.execute(inputObject);
 

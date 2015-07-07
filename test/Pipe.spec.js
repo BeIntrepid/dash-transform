@@ -280,7 +280,7 @@ describe('inputOverride', () => {
         });
     });
 
-    describe('A pipe containing a pipe returns correct values', () => {
+    ignore.describe('A pipe containing a pipe returns correct values', () => {
         it("should run and pass",function (done) {
 
             var switchableInputInputSpec = [{name:"MyValue"}];
@@ -322,6 +322,74 @@ describe('inputOverride', () => {
             var ds = new transform.Stream(pipeNode );
 
             var spec = ds.buildInputSpec();
+
+            //expect(spec.SwitchableInput_MyValue).toBe(0);
+            //expect(spec.SwitchableInput_SwitchableInputParent_i).toBe(0);
+            //console.dir(JSON.parse(JSON.stringify(spec)));
+            var executePromise = ds.execute();
+
+            executePromise.then(()=>{
+
+                done();
+            });
+
+
+        });
+    });
+
+    describe('Testing Stream Cloning', () => {
+        it("should run and pass",function (done) {
+
+            var switchableInputInputSpec = [{name:"MyValue"}];
+            var filterLib = new transform.TransformLibrary();
+            filterLib.clearAll();
+
+            // Build Filters
+
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInput',(input,i)=>{
+                console.log('Filter running ' + 'SwitchableInput');
+                return [1,2,3,4];
+            },switchableInputInputSpec));
+
+            var parentInputSpec = [{name:"SwitchableInputParentVALUE"},{name:"SwitchableInputParentSECONDVALUE"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputParent',(input,i,j)=>{
+                console.log('Filter running ' + 'SwitchableInputParent');
+                console.log(i);
+                return [1,2,3,4];
+            },parentInputSpec));
+
+            var parentParentInputSpec = [{name:"i"}];
+            filterLib.registerFilter(new transform.FunctionFilter('SwitchableInputInternalParent',(input,i)=>{
+                console.log('Filter running ' + 'SwitchableInputInternalParent');
+                return [1,2,3,4];
+            },parentParentInputSpec));
+
+            var switchableInputNode = filterLib.getFilterWrapped('SwitchableInput');
+            var switchableInputParentNode = filterLib.getFilterWrapped('SwitchableInputParent');
+            var switchableInputInternalParent = filterLib.getFilterWrapped('SwitchableInputInternalParent');
+
+            // Register Pipes
+            var pipe = new transform.Pipe('FirstPipe');
+            pipe.add(switchableInputInternalParent );
+
+
+            pipe.add(switchableInputNode);
+            pipe.rootNode.addInput(switchableInputInternalParent );
+
+
+            var pipeNode = new transform.TransformNode('asdf',pipe);
+            pipeNode.addInput(switchableInputParentNode);
+
+            var ds = new transform.Stream(pipeNode );
+
+            ds.build();
+
+            var inputs = ds.getMapInputs();
+            inputs.SwitchableInputParent.forInput('SwitchableInputParentVALUE').value = 'OhEmGee';
+
+            console.dir(JSON.parse(JSON.stringify(inputs)));
+
+            console.log(ds.pipe.rootNode.ancestors[0].name);
 
             //expect(spec.SwitchableInput_MyValue).toBe(0);
             //expect(spec.SwitchableInput_SwitchableInputParent_i).toBe(0);
