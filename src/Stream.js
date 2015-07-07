@@ -101,7 +101,14 @@ export class Stream
     {
         this.busy = true;
         var streamPromise = new Promise((res,rej)=>{
-            var executePromise = this.pipe.execute(args == null ? this.input : args);
+
+            var inputObject = args == null ? this.input : args;
+            inputObject.__executionScope = { currentScope : ''};
+            inputObject.__executionScope.inputOverrides = this.buildInputSpec();
+            inputObject.__executionScope.inputOverrides['FirstPipe_SwitchableInputInternalParent1_i'].value = 'ohMyGod';
+
+            var executePromise = this.pipe.execute(inputObject);
+
             executePromise.then(this.onPipeExecuted.bind(this));
             executePromise.then((i)=>{
                 this.busy = false;
@@ -117,5 +124,6 @@ export class Stream
         var spec = {};
         this.pipe.rootNode.mapInputs('',spec );
         console.log(JSON.parse(JSON.stringify(spec)));
+        return spec;
     }
 }

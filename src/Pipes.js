@@ -15,6 +15,11 @@ export class Pipe
         this.rootNode = rootNode;
     }
 
+    getName()
+    {
+        return this.name;
+    }
+
     add(filterObj)
     {
 
@@ -147,6 +152,8 @@ export class Pipe
                 {
                         inputs.push(args);
                 }
+
+                //Build the current scope name
 
                 var extractedInputs = this.extractInputs(inputs);
                 var inputForFunction = [inputObject].concat(extractedInputs);

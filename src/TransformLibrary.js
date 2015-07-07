@@ -36,7 +36,7 @@ export class TransformLibrary
 
     getPipe(pipeName)
     {
-        return Enumerable(TransformLibrary.pipes).where((f)=>{f.name == pipeName}).single();
+        return Enumerable(TransformLibrary.pipes).where((f)=>{return f.name == pipeName}).single();
     }
 
     getPipeWrapped(pipeName)

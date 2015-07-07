@@ -12,6 +12,11 @@ export class Filter
         return this.inputSpec;
     }
 
+    getName()
+    {
+        return this.name;
+    }
+
     constructor(name,inputSpec)
     {
         this.name = name;
