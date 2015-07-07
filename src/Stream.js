@@ -8,12 +8,13 @@ export class Stream
     busy = false;
     pipe = null;
     mappedInputs = null;
-    input = {};
+    triggers = {};
     output = {};
     status = 'stopped';
     subscriptions = [];
     bindedInputChanged = this.inputChanged.bind(this);
     subscriptionTimeout = null;
+    hasBeenBuilt = false;
 
     constructor(pipe)
     {
@@ -29,13 +30,13 @@ export class Stream
         }
 
         this.pipe = wrappedPipe;
-        this.setInput(this.input);
+        this.setTriggers(this.triggers);
     }
 
-    setInput(newInput)
+    setTriggers(newInput)
     {
-        this.setObservable(newInput,this.input);
-        this.input = newInput;
+        this.setObservable(newInput,this.triggers);
+        this.triggers = newInput;
     }
 
     setObservable(obs,oldObs)
@@ -104,7 +105,7 @@ export class Stream
         this.cloneTree();
         this.makeNodeNamesUnique();
         this.getMapInputs();
-
+        this.hasBeenBuilt = true;
     }
 
     getMapInputs()
@@ -129,10 +130,15 @@ export class Stream
 
     execute(args)
     {
+        if(!this.hasBeenBuilt)
+        {
+            throw "Stream hasn't been built before executing";
+        }
+
         this.busy = true;
         var streamPromise = new Promise((res,rej)=>{
 
-            var inputObject = args == null ? this.input : args;
+            var inputObject = args == null ? {} : args;
 
             inputObject.__inputResolver = new InputResolver(this.mappedInputs);
 

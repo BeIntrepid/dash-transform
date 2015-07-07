@@ -1,7 +1,7 @@
-System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
+System.register(['./Filters', './Pipes', './Nodes', './InputResolver'], function (_export) {
     'use strict';
 
-    var filters, Pipe, TransformNode, Stream;
+    var filters, Pipe, TransformNode, InputResolver, Stream;
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -12,6 +12,8 @@ System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
             Pipe = _Pipes.Pipe;
         }, function (_Nodes) {
             TransformNode = _Nodes.TransformNode;
+        }, function (_InputResolver) {
+            InputResolver = _InputResolver.InputResolver;
         }],
         execute: function () {
             Stream = (function () {
@@ -20,27 +22,29 @@ System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
 
                     this.busy = false;
                     this.pipe = null;
-                    this.input = {};
+                    this.mappedInputs = null;
+                    this.triggers = {};
                     this.output = {};
                     this.status = 'stopped';
                     this.subscriptions = [];
                     this.bindedInputChanged = this.inputChanged.bind(this);
                     this.subscriptionTimeout = null;
+                    this.hasBeenBuilt = false;
 
-                    var wrappedPipe = undefined;
+                    var wrappedPipe = pipe;
                     if (pipe instanceof TransformNode) {
-                        wrappedPipe = pipe;
-                    } else if (pipe instanceof filters.Filter || pipe instanceof Pipe) {
-                        wrappedPipe = new TransformNode('', pipe);
+                        wrappedPipe = new Pipe('StreamGeneratedPipe', pipe);
+                    } else if (pipe instanceof filters.Filter) {
+                        wrappedPipe = new Pipe('StreamGeneratedPipe', new TransformNode('StreamGeneratedTransformNode', pipe));
                     }
 
                     this.pipe = wrappedPipe;
-                    this.setInput(this.input);
+                    this.setTriggers(this.triggers);
                 }
 
-                Stream.prototype.setInput = function setInput(newInput) {
-                    this.setObservable(newInput, this.input);
-                    this.input = newInput;
+                Stream.prototype.setTriggers = function setTriggers(newInput) {
+                    this.setObservable(newInput, this.triggers);
+                    this.triggers = newInput;
                 };
 
                 Stream.prototype.setObservable = function setObservable(obs, oldObs) {
@@ -94,12 +98,46 @@ System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
                     this.subscriptions.push(subscription);
                 };
 
+                Stream.prototype.build = function build() {
+                    this.cloneTree();
+                    this.makeNodeNamesUnique();
+                    this.getMapInputs();
+                    this.hasBeenBuilt = true;
+                };
+
+                Stream.prototype.getMapInputs = function getMapInputs() {
+                    if (this.mappedInputs == null) {
+                        var spec = {};
+                        this.pipe.rootNode.mapInputs('', spec);
+                        this.mappedInputs = spec;
+                    }
+                    return this.mappedInputs;
+                };
+
+                Stream.prototype.cloneTree = function cloneTree() {
+                    this.pipe.rootNode = this.pipe.rootNode.cloneTree();
+                };
+
+                Stream.prototype.makeNodeNamesUnique = function makeNodeNamesUnique() {
+                    this.pipe.rootNode.makeNodeNamesUnique();
+                };
+
                 Stream.prototype.execute = function execute(args) {
                     var _this = this;
 
+                    if (!this.hasBeenBuilt) {
+                        throw 'Stream hasn\'t been built before executing';
+                    }
+
                     this.busy = true;
                     var streamPromise = new Promise(function (res, rej) {
-                        var executePromise = _this.pipe.execute(args == null ? _this.input : args);
+
+                        var inputObject = args == null ? {} : args;
+
+                        inputObject.__inputResolver = new InputResolver(_this.mappedInputs);
+
+                        var executePromise = _this.pipe.execute(inputObject);
+
                         executePromise.then(_this.onPipeExecuted.bind(_this));
                         executePromise.then(function (i) {
                             _this.busy = false;
@@ -111,7 +149,10 @@ System.register(['./Filters', './Pipes', './Nodes'], function (_export) {
                 };
 
                 Stream.prototype.buildInputSpec = function buildInputSpec() {
-                    return this.pipe.buildInputSpec();
+                    var spec = {};
+                    this.pipe.rootNode.mapInputs('', spec);
+                    console.log(JSON.parse(JSON.stringify(spec)));
+                    return spec;
                 };
 
                 return Stream;

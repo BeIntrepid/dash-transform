@@ -36,13 +36,18 @@ System.register(['linq-es6', './Nodes'], function (_export) {
                     }).single());
                 };
 
+                TransformLibrary.prototype.clearAll = function clearAll() {
+                    TransformLibrary.filters = [];
+                    TransformLibrary.pipes = [];
+                };
+
                 TransformLibrary.prototype.registerPipe = function registerPipe(pipe) {
                     TransformLibrary.pipes.push(pipe);
                 };
 
                 TransformLibrary.prototype.getPipe = function getPipe(pipeName) {
                     return Enumerable(TransformLibrary.pipes).where(function (f) {
-                        f.name == pipeName;
+                        return f.name == pipeName;
                     }).single();
                 };
 

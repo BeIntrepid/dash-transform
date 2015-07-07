@@ -8,12 +8,13 @@ System.register([], function (_export) {
     return {
         setters: [],
         execute: function () {
-            InputSpec = function InputSpec(name, inputs, ancestors) {
+            InputSpec = function InputSpec(name, inputs, ancestors, nodeGuid) {
                 _classCallCheck(this, InputSpec);
 
                 this.name = name;
                 this.inputs = inputs;
                 this.ancestors = ancestors;
+                this.nodeGuid = nodeGuid;
             };
 
             _export("InputSpec", InputSpec);

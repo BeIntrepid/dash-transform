@@ -25,7 +25,7 @@ export class TransformNode
 
     getNodeName()
     {
-        return this.name;
+        return this.name != null ? this.name : this.pipe.name;
     }
 
     getName()
@@ -44,6 +44,10 @@ export class TransformNode
             if(n.pipe instanceof Filter)
             {
                 let nodeInputSpec = n.pipe.getInputSpec(scope,inputMapping);
+                if(nodeInputSpec == null)
+                {
+                    return;
+                }
                 nodeInputSpec.forEach((nodeInput)=>{
 
                     if(inputMapping[this.buildInputName(scope,n.getNodeName())] == null)
@@ -150,6 +154,16 @@ export class TransformNode
                 var inputOverride = inputOverrides.inputs[i];
                 if(inputOverride.value != null)
                 {
+                    var value = inputOverride.value;
+                    if(inputOverride.value instanceof Function)
+                    {
+                        value = inputOverride.value();
+                    }
+                    else
+                    {
+                        value = inputOverride.value;
+                    }
+
                     args[i] = inputOverride.value;
                 }
             }

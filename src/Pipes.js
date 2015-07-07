@@ -26,7 +26,7 @@ export class Pipe
         var n = null;
         if(filterObj instanceof Function)
         {
-            n = new TransformNode('NoName',new FunctionFilter('Implicit Pipe',filterObj));
+            n = new TransformNode(null,new FunctionFilter('Implicit Pipe',filterObj));
         }
         else if(filterObj instanceof TransformNode)
         {
@@ -34,7 +34,7 @@ export class Pipe
         }
         else if(filterObj instanceof Filter)
         {
-            n = new TransformNode('NoName',filterObj);
+            n = new TransformNode(null,filterObj);
         }
         else if(typeof(filterObj) == "string")
         {
