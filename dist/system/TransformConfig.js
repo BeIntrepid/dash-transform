@@ -17,7 +17,7 @@ System.register([], function (_export) {
 
                 _createClass(TransformConfig, null, [{
                     key: "enableDebugMessages",
-                    value: false,
+                    value: true,
                     enumerable: true
                 }]);
 

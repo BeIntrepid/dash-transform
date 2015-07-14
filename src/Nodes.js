@@ -14,6 +14,11 @@ export class TransformNode
 
     constructor(name,filter)
     {
+        if(name != null && typeof name != "string" )
+        {
+            throw "The wrong type of object has been passed into a TransformNodes's constructor. You probably forgot to pass name as a first parameter";
+        }
+
         this.name = name;
         this.pipe = filter;
     }
