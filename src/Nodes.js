@@ -25,7 +25,17 @@ export class TransformNode
 
     addInput(ancestor)
     {
-        this.ancestors.push(ancestor);
+        var n = ancestor;
+        if(ancestor instanceof Pipe)
+        {
+            n = new TransformNode(null,ancestor);
+        }
+        else if(!(ancestor instanceof TransformNode))
+        {
+            throw "Can only add TransformNodes as Input";
+        }
+
+        this.ancestors.push(n);
     }
 
     getNodeName()
