@@ -1,6 +1,6 @@
 {
   "name": "dash-transform",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "description": "Empty template ready to be used for building modules. Includes a gulp build workflow.",
   "jspm": {
     "main": "index",
