@@ -128,7 +128,7 @@ System.register(['./TransformLibrary', './Filters', './TransformConfig', './Pipe
                     var newNode = new TransformNode(newName, this.pipe);
 
                     if (this.pipe instanceof Pipe) {
-                        this.pipe.rootNode = this.pipe.rootNode.cloneTree();
+                        newNode.pipe = new Pipe(this.pipe.getName(), this.pipe.rootNode.cloneTree());
                     }
 
                     this.ancestors.forEach(function (n) {

@@ -119,11 +119,11 @@ export class TransformNode
 
         var newName = this.name == '' ? this.pipe.name : this.name;
 
-        var newNode = new TransformNode( newName,this.pipe);
+        var newNode = new TransformNode( newName ,this.pipe);
 
         if(this.pipe instanceof Pipe)
         {
-            this.pipe.rootNode = this.pipe.rootNode.cloneTree();
+            newNode.pipe = new Pipe(this.pipe.getName(),this.pipe.rootNode.cloneTree());
         }
 
         this.ancestors.forEach((n)=>{
