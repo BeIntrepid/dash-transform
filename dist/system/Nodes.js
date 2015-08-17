@@ -163,7 +163,11 @@ System.register(['./TransformLibrary', './Filters', './TransformConfig', './Pipe
 
                 TransformNode.prototype.execute = function execute(inputObject, args) {
 
-                    var inputOverrides = inputObject.__inputResolver.getInputOverrides(this);
+                    var inputOverrides = null;
+
+                    if (inputObject != null && inputObject.__inputResolver != null) {
+                        inputOverrides = inputObject.__inputResolver.getInputOverrides(this);
+                    }
 
                     if (inputOverrides != null) {
                         for (var i = 0; i < inputOverrides.inputs.length; i++) {

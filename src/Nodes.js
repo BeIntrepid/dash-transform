@@ -161,7 +161,12 @@ export class TransformNode
     execute(inputObject,args) {
         //if(TransformConfig.enableDebugMessages) console.log('Executing node ' + this.pipe.name);
 
-        var inputOverrides = inputObject.__inputResolver.getInputOverrides(this);
+        var inputOverrides = null;
+
+        if(inputObject != null && inputObject.__inputResolver != null)
+        {
+            inputOverrides = inputObject.__inputResolver.getInputOverrides(this);
+        }
 
         if(inputOverrides != null) {
             for (var i = 0; i < inputOverrides.inputs.length; i++) {
